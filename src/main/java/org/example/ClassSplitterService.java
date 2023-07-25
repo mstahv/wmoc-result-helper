@@ -81,30 +81,15 @@ public class ClassSplitterService {
             // finally check the "top 4 from qualification always to A rule"
             // if more than 1 classes
             if(ageClass.getStartLists().size() > 1) {
+                // go through qualification results and pick top 4 from each class
                 qual.getClassResult().forEach(cr -> {
                     String mc = cr.getClazz().getName().substring(0, 3);
                     if (mc.equals(mainClass)) {
                         List<Iof3PersonResult> eligibleForFinal = new ArrayList<>();
-                        for (int i = 0; i < 4; i++) {
-                            try {
-                                Iof3PersonResult pr = cr.getPersonResult().get(i);
-                                if (pr.getResult().get(0).getStatus() != ResultStatus.OK) {
-                                    // no more valid results
-                                    break;
-                                }
-                                eligibleForFinal.add(pr);
-                                if (i == 3) {
-                                    // check for ties in 4th place
-                                    while (cr.getPersonResult().get(i + 1).getResult().get(0).getPosition().intValue() < 5) {
-                                        i++;
-                                        eligibleForFinal.add(cr.getPersonResult().get(i));
-                                    }
-                                }
-                            } catch (Exception e) {
-                                // no more results
-                                break;
-                            }
-                        }
+                        cr.getPersonResult().stream()
+                                .filter(pr -> pr.getResult().get(0).getPosition() != null
+                                        && pr.getResult().get(0).getPosition().intValue() < 5)
+                                .forEach(eligibleForFinal::add);
 
                         for (Iof3PersonResult pr : eligibleForFinal) {
                             StartList a = ageClass.getStartList(ClazzQualifier.A);
@@ -114,7 +99,8 @@ public class ClassSplitterService {
                                 System.out.println("Top 4 from qualification always to A rule: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven());
                                 FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).relegated.pick(pr.getPerson());
                                 if(finalCompetitor == null) {
-                                    System.out.println("ERROR: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven() + " not found in relegated list, didn't start in Middle final at all?");
+                                    // didn't start in middle final at all -> skip this one
+                                    System.out.println(pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven() + " not found in relegated list, most likely didn't start in Middle final at all.");
                                     continue;
                                 }
                                 finalCompetitor.setReason("Top 4 from qualification always to A");
@@ -124,12 +110,10 @@ public class ClassSplitterService {
                     }
                 });
             }
-
-
         });
 
+        // print the start orders
         ageClasses.forEach(ageClass -> {
-
             ageClass.getStartLists().forEach((clazzQualifier, startList) -> {
                 // first the extra starters, e.g. top from qualification, but mp in middle
                 sortStartGroup(startList.extraStarters);
@@ -236,7 +220,7 @@ public class ClassSplitterService {
 
 
     private static void sortStartGroup(StartGroup startgroup) {
-        // First randomize everyone, so that non-plalced gets random start times
+        // First randomize everyone, so that non-placed gets random start times
         Collections.shuffle(startgroup);
         // Then sort by position or time if defined
         Collections.sort(startgroup, (o1, o2) -> {
