@@ -1,16 +1,12 @@
 package org.example;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
-import org.orienteering.datastandard._3.Class;
 import org.orienteering.datastandard._3.Iof3ClassResult;
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Iof3ResultList;
+import org.orienteering.datastandard._3.PersonRaceResult;
+import org.orienteering.datastandard._3.ResultStatus;
 
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,16 +16,148 @@ import java.util.Map;
 
 public class ClassSplitterService {
 
-    public static String splitToFinals(String value) {
-        return splitToFinals(value, null);
-    }
 
-    public static String splitToFinals(InputStream content) {
-        return splitToFinals(null, content);
-    }
+    public static String splitToFinals(Iof3ResultList qual, Iof3ResultList middleResults) {
+        StringBuilder sb = new StringBuilder();
 
-    public enum ClazzQualifier {
-        A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z
+        Map<String, List<Iof3ClassResult>> mainClassToResult = new LinkedHashMap<>();
+
+        // collect all results per main class for easier handling
+        middleResults.getClassResult().forEach(cr -> {
+            String mainClass = cr.getClazz().getName().substring(0, 3);
+            List<Iof3ClassResult> results = mainClassToResult.get(mainClass);
+            if (results == null) {
+                results = new ArrayList<>();
+                mainClassToResult.put(mainClass, results);
+            }
+            results.add(cr);
+        });
+
+        List<AgeClass> ageClasses = new ArrayList<>();
+        mainClassToResult.forEach((mainClass, results) -> {
+            AgeClass ageClass = new AgeClass(mainClass);
+            for (int i = 0; i < results.size(); i++) {
+                // assumes the age classes are in order in the result file!
+                // for example H55A before H55B
+                ClazzQualifier qualifier = ClazzQualifier.values()[i];
+                ageClass.getStartList(qualifier).initFromPersonResults(results.get(i).getPersonResult());
+            }
+            ageClasses.add(ageClass);
+
+            // Handle rules for promotion & relegation
+            List<PromotionRule> promotionRules = clazzAmountToPromotionRules.get(results.size());
+            if (promotionRules != null) {
+                promotionRules.forEach(r -> {
+                    StartList from = ageClass.getStartList(r.getFrom());
+                    StartList to = ageClass.getStartList(r.getTo());
+                    List<FinalCompetitor> promotions = from.pickFromTop(r.getAmountFromTop());
+                    to.addPromoted(promotions);
+
+                    List<FinalCompetitor> relegations = from.pickFromBottom(r.getAmountFromBottom());
+                    to.addRelegated(relegations);
+                    System.out.println("Promotion rule handled!");
+                });
+            } else if (results.size() == 2) {
+                System.out.println("10% rule for only two classes");
+                StartList a = ageClass.getStartList(ClazzQualifier.A);
+                StartList b = ageClass.getStartList(ClazzQualifier.B);
+
+                int promotionAmount = (int) Math.floor(a.normalStartGroup.size() * 0.1);
+                List<FinalCompetitor> relegated = a.pickFromBottom(promotionAmount);
+                b.addRelegated(relegated);
+
+                // Note, in theory we might now relegate competitors with valid result
+                // from A, and promote competitors without one from B, but I guess the
+                // rules can't be perfect
+
+                List<FinalCompetitor> promoted = b.pickFromTop(relegated.size());
+                a.addPromoted(promoted);
+
+                System.out.println("10% rule handled!");
+            } else {
+                System.out.println("No promotion rules for " + results.size() + " class(s)");
+            }
+
+            // finally check the "top 4 from qualification always to A rule"
+            // if more than 1 classes
+            if(ageClass.getStartLists().size() > 1) {
+                qual.getClassResult().forEach(cr -> {
+                    String mc = cr.getClazz().getName().substring(0, 3);
+                    if (mc.equals(mainClass)) {
+                        List<Iof3PersonResult> eligibleForFinal = new ArrayList<>();
+                        for (int i = 0; i < 4; i++) {
+                            try {
+                                Iof3PersonResult pr = cr.getPersonResult().get(i);
+                                if (pr.getResult().get(0).getStatus() != ResultStatus.OK) {
+                                    // no more valid results
+                                    break;
+                                }
+                                eligibleForFinal.add(pr);
+                                if (i == 3) {
+                                    // check for ties in 4th place
+                                    while (cr.getPersonResult().get(i + 1).getResult().get(0).getPosition().intValue() < 5) {
+                                        i++;
+                                        eligibleForFinal.add(cr.getPersonResult().get(i));
+                                    }
+                                }
+                            } catch (Exception e) {
+                                // no more results
+                                break;
+                            }
+                        }
+
+                        for (Iof3PersonResult pr : eligibleForFinal) {
+                            StartList a = ageClass.getStartList(ClazzQualifier.A);
+                            if (!a.normalStartGroup.contains(pr.getPerson())) {
+                                // not in normal start group in A, so must be relegated to B
+                                // lift back to A
+                                System.out.println("Top 4 from qualification always to A rule: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven());
+                                FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).relegated.pick(pr.getPerson());
+                                if(finalCompetitor == null) {
+                                    System.out.println("ERROR: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven() + " not found in relegated list, didn't start in Middle final at all?");
+                                    continue;
+                                }
+                                finalCompetitor.setReason("Top 4 from qualification always to A");
+                                a.addExtraStarter(finalCompetitor);
+                            }
+                        }
+                    }
+                });
+            }
+
+
+        });
+
+        ageClasses.forEach(ageClass -> {
+
+            ageClass.getStartLists().forEach((clazzQualifier, startList) -> {
+                // first the extra starters, e.g. top from qualification, but mp in middle
+                sortStartGroup(startList.extraStarters);
+                startList.extraStarters.forEach(fc -> {
+                    printCompetitor(sb, ageClass, clazzQualifier, fc, "extra starter");
+                });
+
+                // thin the promoted, empty for last final
+                sortStartGroup(startList.promoted);
+                startList.promoted.forEach(fc -> {
+                    printCompetitor(sb, ageClass, clazzQualifier, fc, "promoted");
+                });
+
+                // then print normal start group
+                sortStartGroup(startList.normalStartGroup);
+                startList.normalStartGroup.forEach(fc -> {
+                    printCompetitor(sb, ageClass, clazzQualifier, fc, "normal");
+                });
+
+                // last the relegated, empty for A finals
+                sortStartGroup(startList.relegated);
+                startList.relegated.forEach(fc -> {
+                    printCompetitor(sb, ageClass, clazzQualifier, fc, "relegated");
+                });
+
+            });
+        });
+        return sb.toString();
     }
 
     public static class PromotionRule {
@@ -107,146 +235,42 @@ public class ClassSplitterService {
     }
 
 
-    private static String splitToFinals(String urlValue, InputStream stream) {
-        StringBuilder sb = new StringBuilder();
-        try {
-            JAXBContext jaxbContext = JAXBContext.newInstance(Iof3ResultList.class);
-            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-            Iof3ResultList rl;
-            if(stream != null) {
-                rl = (Iof3ResultList) jaxbUnmarshaller.unmarshal(stream);
-            } else {
-                rl = (Iof3ResultList) jaxbUnmarshaller.unmarshal(new URL(urlValue));
+    private static void sortStartGroup(StartGroup startgroup) {
+        // First randomize everyone, so that non-plalced gets random start times
+        Collections.shuffle(startgroup);
+        // Then sort by position or time if defined
+        Collections.sort(startgroup, (o1, o2) -> {
+            if (o1.getPosition() == Integer.MAX_VALUE && o2.getPosition() == Integer.MAX_VALUE) {
+                // neither has been placed, check by time if defined or consider it a tie if neither has time defined
+                return o1.getTime() - o2.getTime();
             }
-
-            Map<String, List<Iof3ClassResult>> mainClassToResult = new LinkedHashMap<>();
-
-            rl.getClassResult().forEach(cr -> {
-                String mainClass = cr.getClazz().getName().substring(0, 3);
-                List<Iof3ClassResult> results = mainClassToResult.get(mainClass);
-                if (results == null) {
-                    results = new ArrayList<>();
-                    mainClassToResult.put(mainClass, results);
-                }
-                results.add(cr);
-            });
-
-            Map<String, List<Iof3ClassResult>> nextMainClassToStarter = new LinkedHashMap<>();
-
-            mainClassToResult.forEach((mainClass, results) -> {
-                List<Iof3ClassResult> nextclasses = new ArrayList<>();
-                for (int i = 0; i < results.size(); i++) {
-                    String clazzName = mainClass + ClazzQualifier.values()[i];
-                    Iof3ClassResult iof3ClassResult = new Iof3ClassResult();
-                    Class aClass = new Class();
-                    aClass.setName(clazzName);
-                    iof3ClassResult.setClazz(aClass);
-                    iof3ClassResult.getPersonResult().addAll(results.get(i).getPersonResult());
-                    nextclasses.add(iof3ClassResult);
-                }
-                nextMainClassToStarter.put(mainClass, nextclasses);
-
-                List<PromotionRule> promotionRules = clazzAmountToPromotionRules.get(results.size());
-                if (promotionRules != null) {
-                    promotionRules.forEach(r -> {
-                        Iof3ClassResult from = nextclasses.get(r.getFrom().ordinal());
-                        Iof3ClassResult to = nextclasses.get(r.getTo().ordinal());
-                        List<Iof3PersonResult> personResult = results.get(r.getFrom().ordinal()).getPersonResult();
-
-                        List<Iof3PersonResult> promotions = new ArrayList<>(personResult.subList(0, r.getAmountFromTop()));
-                        takeInTies(promotions, personResult, r.getAmountFromTop());
-                        to.getPersonResult().addAll(promotions);
-                        from.getPersonResult().removeAll(promotions);
-
-                        // abusing sex as comment field for testing...
-                        promotions.forEach(p -> p.getPerson().setSex("promoted, from " + results.get(r.getFrom().ordinal()).getClazz().getName()));
-
-                        // Currently takes just the last from the result list, TODO should DNS/DNF/DQ be taken into account?
-                        Collections.reverse(personResult);
-                        List<Iof3PersonResult> relegations = new ArrayList<>(personResult.subList(0, r.getAmountFromBottom()));
-                        takeInTies(relegations, personResult, r.getAmountFromBottom());
-                        // abusing sex as comment field for testing...
-                        relegations.forEach(p -> p.getPerson().setSex("relegated, from " + results.get(r.getFrom().ordinal()).getClazz().getName()));
-                        Collections.reverse(personResult);
-
-                        to.getPersonResult().addAll(relegations);
-                        from.getPersonResult().removeAll(relegations);
-                        System.out.println("Promotion rule handled!");
-                    });
-                } else if(nextclasses.size() == 2) {
-                    System.out.println("10% rule for only two classes");
-
-                    Iof3ClassResult a = nextclasses.get(0);
-                    Iof3ClassResult b = nextclasses.get(1);
-                    List<Iof3PersonResult> personResult = results.get(1).getPersonResult();
-
-                    int promotionAmount = (int) Math.floor(personResult.size() * 0.1);
-
-                    List<Iof3PersonResult> promotions = new ArrayList<>(personResult.subList(0, promotionAmount));
-                    takeInTies(promotions, personResult, promotionAmount);
-                    a.getPersonResult().addAll(promotions);
-                    b.getPersonResult().removeAll(promotions);
-
-                    // abusing sex as comment field for testing...
-                    promotions.forEach(p -> p.getPerson().setSex("promoted, from B"));
-
-                    // Currently takes just the last from the result list, TODO should DNS/DNF/DQ be taken into account?
-                    personResult = results.get(0).getPersonResult();
-                    Collections.reverse(personResult);
-                    List<Iof3PersonResult> relegations = new ArrayList<>(personResult.subList(0, promotionAmount));
-                    takeInTies(relegations, personResult, promotionAmount);
-                    // abusing sex as comment field for testing...
-                    relegations.forEach(p -> p.getPerson().setSex("relegated, from A"));
-                    Collections.reverse(personResult);
-
-                    b.getPersonResult().addAll(relegations);
-                    a.getPersonResult().removeAll(relegations);
-                    System.out.println("10% rule handled!");
-                } else {
-                    System.out.println("No promotion rules for " + results.size() + " class(s)");
-                }
-
-            });
-
-            nextMainClassToStarter.forEach((nextMainClass, nextResults) -> {
-                nextResults.forEach(nextResult -> {
-                    List<Iof3PersonResult> personResult = nextResult.getPersonResult();
-                    Collections.reverse(personResult);
-                    personResult.forEach(p -> {
-                        sb.append(nextResult.getClazz().getName());
-                        sb.append(";");
-                        sb.append(p.getPerson().getName().getGiven() + " " + p.getPerson().getName().getFamily());
-                        sb.append(";");
-                        sb.append(p.getPerson().getSex());
-                        sb.append(";\n");
-                    });
-                });
-            });
-
-        } catch (MalformedURLException e) {
-            throw new RuntimeException(e);
-        } catch (JAXBException e) {
-            throw new RuntimeException(e);
-        }
-        return sb.toString();
+            // normally check by position
+            // non-set (DNF,DSQ, etc) is Integer.MAX_VALUE -> last
+            return o1.getPosition() - o2.getPosition();
+        });
+        // Reverse, so that worst start firs, best in the end
+        Collections.reverse(startgroup);
     }
 
-    private static void takeInTies(List<Iof3PersonResult> promotions, List<Iof3PersonResult> personResult, int promotionAmount) {
-        if(promotions.size() == 0) {
-            return;
+    private static void printCompetitor(StringBuilder sb, AgeClass ageClass, ClazzQualifier clazzQualifier, FinalCompetitor fc, String comment) {
+        sb.append(ageClass.getName() + "-" + clazzQualifier);
+        sb.append(";");
+        sb.append(fc.getPerson().getName().getGiven() + " " + fc.getPerson().getName().getFamily());
+        sb.append(";");
+        sb.append(comment);
+        sb.append(";");
+        if (fc.getPosition() != Integer.MAX_VALUE) {
+            sb.append(fc.getPosition());
         }
-        Iof3PersonResult lastQualifier = promotions.get(promotionAmount - 1);
-        int i = promotionAmount;
-        while(personResult.size() > i ) {
-            Iof3PersonResult potentialTie = personResult.get(i);
-            // TODO check if/when there can be multiple results in the file. Not with test data at least.
-            if(potentialTie.getResult().get(0).getPosition() == lastQualifier.getResult().get(0).getPosition()) {
-                promotions.add(potentialTie);
-                System.out.println("Took in a tie: " + potentialTie.getPerson().getName().getGiven() + " " + potentialTie.getPerson().getName().getFamily());
-                i++;
-            } else {
-                break;
-            }
+        sb.append(";");
+        if (fc.getTime() != Integer.MAX_VALUE) {
+            sb.append(Duration.ofMillis(fc.getTime() * 10));
         }
+        sb.append(";");
+        if(fc.getReason() != null) {
+            sb.append(fc.getReason());
+        }
+        sb.append(";\n");
     }
+
 }
