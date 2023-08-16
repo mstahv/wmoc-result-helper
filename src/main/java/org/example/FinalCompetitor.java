@@ -11,13 +11,18 @@ public class FinalCompetitor {
     private int time = Integer.MAX_VALUE;
     private String reason;
 
-    public FinalCompetitor(Person person, BigInteger position, Double time) {
+    private ClazzQualifier middleFinalClass;
+
+    public FinalCompetitor(Person person, BigInteger position, Double time, ClazzQualifier middleFinalClass) {
         this.person = person;
         if(time != null) {
             this.time = (int) (time.doubleValue()*100); // 100ths of a second
         }
         if(position != null) {
             this.position = position.intValue();
+        }
+        if(middleFinalClass != null) {
+            this.middleFinalClass = middleFinalClass;
         }
     }
 
@@ -39,5 +44,9 @@ public class FinalCompetitor {
 
     public String getReason() {
         return reason;
+    }
+
+    public ClazzQualifier getMiddleFinalClass() {
+        return middleFinalClass;
     }
 }

@@ -224,6 +224,12 @@ public class ClassSplitterService {
         Collections.shuffle(startgroup);
         // Then sort by position or time if defined
         Collections.sort(startgroup, (o1, o2) -> {
+            // B finalists are always after C finalists, etc
+            // happens on promotions to A in large classes
+            if(o1.getMiddleFinalClass() != o2.getMiddleFinalClass()) {
+                return o1.getMiddleFinalClass().ordinal() - o2.getMiddleFinalClass().ordinal();
+            }
+
             if (o1.getPosition() == Integer.MAX_VALUE && o2.getPosition() == Integer.MAX_VALUE) {
                 // neither has been placed, check by time if defined or consider it a tie if neither has time defined
                 return o1.getTime() - o2.getTime();
@@ -250,6 +256,8 @@ public class ClassSplitterService {
         if (fc.getTime() != Integer.MAX_VALUE) {
             sb.append(Duration.ofMillis(fc.getTime() * 10));
         }
+        sb.append(";Middle series:");
+        sb.append(fc.getMiddleFinalClass());
         sb.append(";");
         if(fc.getReason() != null) {
             sb.append(fc.getReason());
