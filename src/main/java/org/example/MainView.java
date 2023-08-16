@@ -46,7 +46,7 @@ public class MainView extends VerticalLayout {
 
         VerticalLayout controls = new VerticalLayout();
         button = new Button("Split to finals", e -> {
-            String startlist = ClassSplitterService.splitToFinals(middleResults, qualResults);
+            String startlist = ClassSplitterService.splitToFinals(qualResults, middleResults);
             preview.setText(startlist);
             download.setEnabled(true);
         });
