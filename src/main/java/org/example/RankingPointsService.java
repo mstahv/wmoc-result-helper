@@ -1,0 +1,95 @@
+package org.example;
+
+import org.orienteering.datastandard._3.EntryList;
+import org.orienteering.datastandard._3.Iof3ResultList;
+
+import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class RankingPointsService {
+
+    public static Map<String, Integer> calculatePoints(List<Iof3ResultList> previousYearResults) {
+        Map<String, Integer> points = new HashMap<>();
+        previousYearResults.forEach(iof3ResultList -> {
+            iof3ResultList.getClassResult().forEach(classResult -> {
+                classResult.getPersonResult().forEach(personResult -> {
+                    String iofId = personResult.getPerson().getId().get(0).getValue();
+                    BigInteger position = personResult.getResult().get(0).getPosition();
+                    if(position != null) {
+                        int pos = position.intValue();
+                        // first one gets 20 points, second 19, etc.
+                        int pointsForPosition = 21 - pos;
+                        if(pointsForPosition > 0) {
+                            points.put(iofId, points.getOrDefault(iofId, 0) + pointsForPosition);
+                        };
+                    }
+                });
+            });
+        });
+        return points;
+    }
+
+    public static Map<String, List<QualificationCompetitor>> calculatePoints(ArrayList<Iof3ResultList> previousYearResults, EntryList entryList, Integer raceId) {
+        Map<String, Integer> iofIdToPoints = calculatePoints(previousYearResults);
+
+        Map<String, List<QualificationCompetitor>> classToCompetitor = new TreeMap<>();
+        Map<String, List<QualificationCompetitor>> heatToCompetitor = new TreeMap<>();
+
+        entryList.getPersonEntry().forEach(personEntry -> {
+            if(personEntry.getRaceNumber().contains(new BigInteger(String.valueOf(raceId)))) {
+                String iofId = personEntry.getPerson().getId().get(0).getValue();
+                String clazz = personEntry.getClazz().get(0).getName();
+                classToCompetitor.computeIfAbsent(clazz, k -> new ArrayList<>()).add(
+                        new QualificationCompetitor(iofId,
+                                personEntry.getPerson().getName(),
+                                clazz,
+                                personEntry.getPerson().getNationality().getCode(),
+                                iofIdToPoints.getOrDefault(iofId,0)
+                        )
+                );
+            }
+        });
+
+        classToCompetitor.forEach((clazz, competitors) -> {
+            Collections.shuffle(competitors);
+            competitors.sort((o1, o2) -> {
+                int comparePoint = Integer.compare(o2.points(), o1.points());
+                if(comparePoint != 0) {
+                    return comparePoint;
+                };
+                return o1.nationality().compareTo(o2.nationality());
+            });
+            System.out.println("Class: " + clazz);
+            competitors.forEach(competitor -> {
+                System.out.println(competitor.name().getGiven() + " " + competitor.name().getFamily() + " " + competitor.points() + " " + competitor.nationality());
+            });
+
+            List<List<QualificationCompetitor>> heats = new ArrayList<>();
+            int numHeats = (int) Math.ceil(competitors.size() / 80.0); // max 80  users per heat
+            for(int i = 0; i < numHeats; i++) {
+                heats.add(new ArrayList<>());
+            }
+            // distribute runners to heats with "ABBA" principle
+            for(int i = 0 ; i < competitors.size(); i++) {
+                boolean raising = (i % (numHeats*2) ) % 2 == 0;
+                int heatIndex = i % numHeats;
+                if(!raising) {
+                    heatIndex = (numHeats - heatIndex)%numHeats;
+                }
+                heats.get(heatIndex).add(competitors.get(i));
+            }
+            for (int i = 0; i < heats.size(); i++) {
+                List<QualificationCompetitor> competitorList = heats.get(i);
+                //Collections.shuffle(competitorList);
+                heatToCompetitor.put(clazz + "-" + (i+1), competitorList);
+            }
+        });
+
+        return heatToCompetitor;
+    }
+}

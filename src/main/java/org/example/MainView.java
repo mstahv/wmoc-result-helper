@@ -10,13 +10,15 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.Iof3ResultList;
+import org.vaadin.firitin.appframework.MenuItem;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-@Route
+@Route(layout = TopLayout.class)
+@MenuItem(title = "Forest final startlists")
 public class MainView extends VerticalLayout {
 
 
@@ -82,7 +84,7 @@ public class MainView extends VerticalLayout {
                 button
         );
 
-        add(new H1("WMOC Forest final class splitter"),
+        add(
                 controls,
                 download,
                 new H3("Preview:"),
