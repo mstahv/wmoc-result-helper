@@ -7,4 +7,4 @@ This version tries to take into account all rules for version v1.21. Bug reports
 
 To run the project, ensure you have Java 17 or newer & Maven installed and run `mvn jetty:run` and open [http://localhost:8080](http://localhost:8080) in browser.
 
-Online version deployed temporarily to: https://wmoc-sl-ft.azurewebsites.net
+Online version deployed temporarily to: https://wmoc-result-helper.dokku1.parttio.org
