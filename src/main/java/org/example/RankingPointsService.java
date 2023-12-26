@@ -92,4 +92,14 @@ public class RankingPointsService {
 
         return heatToCompetitor;
     }
+
+    public static Map<String, List<QualificationCompetitor>> calculateFinalStartLists(Iof3ResultList qualResults, EntryList entryList, Integer raceId) {
+
+
+
+
+
+        return Collections.emptyMap();
+    }
+
 }

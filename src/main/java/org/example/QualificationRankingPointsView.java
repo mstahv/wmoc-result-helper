@@ -43,6 +43,8 @@ public class QualificationRankingPointsView extends VerticalLayout {
     Integer raceId;
 
     public QualificationRankingPointsView() {
+        add("This view calculates ranking points from n last year results, and generates even qualification heats based on them and countries.");
+
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(Iof3ResultList.class, EntryList.class);

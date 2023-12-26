@@ -1,11 +1,11 @@
 package org.example;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteAlias;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 @Route(layout = TopLayout.class)
-@MenuItem(title = "Forest final startlists")
-public class MainView extends VerticalLayout {
-
+@RouteAlias("")
+public class ForestFinalView extends VerticalLayout {
 
     private final Pre preview = new Pre();
     private final DynamicFileDownloader download = new DynamicFileDownloader("Download CSV", "finals.csv", (OutputStream stream) -> {
@@ -35,7 +34,8 @@ public class MainView extends VerticalLayout {
     private Iof3ResultList qualResults;
     private Iof3ResultList middleResults;
 
-    public MainView() {
+    public ForestFinalView() {
+        add("This view makes the magical promotions/relegations for forest final");
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(Iof3ResultList.class);
