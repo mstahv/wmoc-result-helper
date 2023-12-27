@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 @Route(layout = TopLayout.class)
-@RouteAlias(value = "", layout = TopLayout.class)
 public class ForestFinalView extends VerticalLayout {
 
     private final Pre preview = new Pre();
