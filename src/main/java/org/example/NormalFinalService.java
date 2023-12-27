@@ -38,7 +38,12 @@ public class NormalFinalService {
             int runnersInFinals = 0;
             if(numberOfRunners < 20) {
                 // All to A final
-                List<FinalRunner> a = collectFinalClass(resultLists, new MutableInt(1));
+                List<FinalRunner> a = new ArrayList<>();
+                collectPositionedToFinalClass(resultLists, 1, a);
+                // Also non-positioned ones, but these should be "ignored"
+                // in the final (can get OK result, but non-positioned)
+                // TODO should have special flag in the data structure/CSV export??
+                while (collectNonPositioned(resultLists, a)) {}
                 finals.add(new FinalClazz(mainClass + "A", a));
                 runnersInFinals += a.size();
             } else if(numberOfRunners <= 160) {
@@ -53,7 +58,8 @@ public class NormalFinalService {
                     resultsFound = collectResultsForPosition(resultLists, pos, a);
                     pos++;
                 }
-                // Note, that only runners with a proper result are picked to A
+                // Note, that only runners with a proper result are picked to A.
+                // In theory A final could become quite small
 
                 List<FinalRunner> b = new ArrayList<>();
                 // collect those with result, in order by position
@@ -65,33 +71,47 @@ public class NormalFinalService {
                 // Then pick remaining runners (mis-punched, dnf, dns, etc)
                 // TODO Picking these 1 by qual class as long as found, don't
                 // know what would be right. Should be randomized or sorted with some logic??
-                while(collectNonPositioned(resultLists, b)) {
-
-                }
+                while(collectNonPositioned(resultLists, b)) {}
 
                 finals.add(new FinalClazz(mainClass + "A", a));
                 finals.add(new FinalClazz(mainClass + "B", b));
                 runnersInFinals += a.size();
                 runnersInFinals += b.size();
-
             } else {
-
+                // 3 or more final classes...
                 List<FinalRunner> f;
-                MutableInt pos = new MutableInt(1);
                 int clazzIndex = 0;
-                while(!(f = collectFinalClass(resultLists, pos)).isEmpty()) {
+                int pos = 1;
+                do {
+                    f = new ArrayList<>();
+                    pos = collectPositionedToFinalClass(resultLists, pos, f);
                     runnersInFinals += f.size();
+                    ClazzQualifier qualifier = ClazzQualifier.values()[clazzIndex];
+                    finals.add(new FinalClazz(mainClass + qualifier, f));
+                    clazzIndex++;
+                } while(f.size() >= 80);
+
+                // collect non-positioned runners
+                List<FinalRunner> nonPositioned = new ArrayList<>();
+                while(collectNonPositioned(resultLists, nonPositioned)) {}
+
+                // Note, there is no actual rule for this, but apparently
+                // for example 2022 they have done it this way
+                if((f.size() + nonPositioned.size()) > 100) {
+                    // Huge amount of non-positioned, "ö final" becomes
+                    // too big -> create yet another for non-positioned
+                    ClazzQualifier qualifier = ClazzQualifier.values()[clazzIndex];
+                    finals.add(new FinalClazz(mainClass + qualifier, nonPositioned));
+                } else {
+                    // normal situation, add non-positioned to the last one
+                    f.addAll(nonPositioned);
                     if(f.size() < 20) {
                         // too few for the last final, merge with the previous
-                        finals.get(finals.size() -1).runners().addAll(f);
-                    } else {
-                        ClazzQualifier qualifier = ClazzQualifier.values()[clazzIndex];
-
-                        finals.add(new FinalClazz(mainClass + qualifier, f));
-                        clazzIndex++;
+                        finals.get(finals.size() -2).runners().addAll(f);
+                        finals.remove(finals.size() - 1);
                     }
                 }
-
+                runnersInFinals += nonPositioned.size();
             }
             if(runnersInFinals != numberOfRunners) {
                 throw new RuntimeException("Not all qualifiers collected to finals!");
@@ -105,28 +125,25 @@ public class NormalFinalService {
         return finals;
     }
 
-    private static List<FinalRunner> collectFinalClass(List<Iof3ClassResult> resultLists, MutableInt pos) {
-        ArrayList<FinalRunner> list = new ArrayList<>();
+    /**
+     * Compiles a final from qualification results, where there is 80 runners
+     * (if found), but so that all runners with same position as the 80th
+     * qualified runners will be taken in.
+     *
+     * @param resultLists
+     * @param pos
+     * @return
+     */
+    private static int collectPositionedToFinalClass(List<Iof3ClassResult> resultLists,int pos, List<FinalRunner> list) {
         while(list.size() < 80) {
-            if(!pos.isLE0()) {
-                // collect next round by position
-                boolean foundResults = collectResultsForPosition(resultLists, pos.intValue(), list);
-                if(!foundResults) {
-                    // indicate that no more positioned results available
-                    pos.set(-1);
-                } else {
-                    pos.inc();
-                }
-            } else {
-                // all positioned found, collect non-positioned
-                // TODO: refactor so that only one "round" take at once
-                boolean foundNonPositioned = collectNonPositioned(resultLists, list);
-                if(!foundNonPositioned) {
-                    break;
-                }
+            // collect next round by position
+            boolean foundOkResults = collectResultsForPosition(resultLists, pos, list);
+            pos++;
+            if(!foundOkResults) {
+                break;
             }
         }
-        return list;
+        return pos;
     }
 
     private static boolean collectNonPositioned(List<Iof3ClassResult> resultLists, List<FinalRunner> b) {
@@ -135,6 +152,9 @@ public class NormalFinalService {
             if(!classResult.getPersonResult().isEmpty()) {
                 found = true;
                 Iof3PersonResult r = classResult.getPersonResult().remove(0);
+                if(r.getResult().get(0).getPosition() != null) {
+                    throw new IllegalStateException("A positioned runner is not yet collected!");
+                }
                 b.add(new FinalRunner(
                         r.getPerson().getId().get(0).getValue(),
                         r.getPerson().getName().getGiven() + " " + r.getPerson().getName().getFamily(),
@@ -146,7 +166,6 @@ public class NormalFinalService {
     }
 
     private static boolean collectResultsForPosition(List<Iof3ClassResult> resultLists, int pos, List<FinalRunner> a) {
-        int collected = 0;
         boolean hasResults = false;
         for(var rl : resultLists) {
             Iterator<Iof3PersonResult> iterator = rl.getPersonResult().iterator();

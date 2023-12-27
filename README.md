@@ -14,7 +14,7 @@ Online version deployed temporarily to: https://wmoc-result-helper.dokku1.partti
 
 ### Normal final composition (SF/MF)
 
- * How to handle if situation if there are a lot of non-positioned qualifiers? E.g. M55 2022. In Spring qualification 28 mp/dsq/dns. Rules don't seem to be clear how to compose last final(s). In 2022, the B final is not filled with non-positioned and only contains 72 runners. C then contains all non-positioned runners. The weird thing is the there are 30 in C, not 28, didn't check who are the extras, if it was possible to sign up only for final 🤷‍. Interpreting the rules to me it would seem there shouldn't be C, but large B with all non-positioned runners. Should there be a rule/code for too large last final 🤔
+ * How to handle if situation if there are a lot of non-positioned qualifiers? E.g. M55 2022. In Sprint qualification 28 mp/dsq/dns. Rules don't seem to be clear how to compose last final(s). In 2022, the B final is not filled with non-positioned and only contains 72 runners. C then contains all non-positioned runners. A weird separate thing is the there are 30 in C, not 28 (Morten Aamodt, Sakari Mikkola for some reason not it B, but in C), mistake in final compilation🤷‍. Interpreting the rules to me it would seem there shouldn't be C in this kind of case, but large B with all non-positioned runners. But B can become very large, so I understand why 2022 they did it this ways. This is also how this software now works, in case the "ö final" becomes very large (100 >). Should there be a rule/code for too large last final 🤔
  * Why 2022 Sprint M60B only has 79?
  * Is there some rule for assigning non-positioned runners to some specific order? 
 
