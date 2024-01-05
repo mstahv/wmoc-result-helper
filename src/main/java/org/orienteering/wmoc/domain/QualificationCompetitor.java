@@ -1,4 +1,4 @@
-package org.example;
+package org.orienteering.wmoc.domain;
 
 import org.orienteering.datastandard._3.PersonName;
 

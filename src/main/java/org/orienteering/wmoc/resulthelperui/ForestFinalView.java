@@ -1,16 +1,15 @@
-package org.example;
+package org.orienteering.wmoc.resulthelperui;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteAlias;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.Iof3ResultList;
-import org.vaadin.firitin.appframework.MenuItem;
+import org.orienteering.wmoc.services.ClassSplitterService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 

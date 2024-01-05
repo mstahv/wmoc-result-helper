@@ -1,18 +1,16 @@
-package org.example;
+package org.orienteering.wmoc.resulthelperui;
 
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
-import org.orienteering.datastandard._3.Race;
+import org.orienteering.wmoc.domain.FinalClazz;
+import org.orienteering.wmoc.services.NormalFinalService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
@@ -20,9 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.util.List;
-import java.util.Map;
 
 @Route(layout = TopLayout.class)
 public class NormalFinalView extends VerticalLayout {

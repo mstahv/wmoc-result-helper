@@ -1,4 +1,4 @@
-package org.example;
+package org.orienteering.wmoc.resulthelperui;
 
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;

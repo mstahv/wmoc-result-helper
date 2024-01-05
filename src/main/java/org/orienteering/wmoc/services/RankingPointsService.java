@@ -1,7 +1,8 @@
-package org.example;
+package org.orienteering.wmoc.services;
 
 import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
+import org.orienteering.wmoc.domain.QualificationCompetitor;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

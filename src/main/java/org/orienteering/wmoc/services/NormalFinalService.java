@@ -1,10 +1,12 @@
-package org.example;
+package org.orienteering.wmoc.services;
 
-import com.helger.commons.mutable.MutableInt;
 import org.orienteering.datastandard._3.Iof3ClassResult;
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Iof3ResultList;
 import org.orienteering.datastandard._3.PersonRaceResult;
+import org.orienteering.wmoc.domain.ClazzQualifier;
+import org.orienteering.wmoc.domain.FinalClazz;
+import org.orienteering.wmoc.domain.FinalRunner;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -96,7 +98,7 @@ public class NormalFinalService {
                 while(collectNonPositioned(resultLists, nonPositioned)) {}
 
                 // Note, there is no actual rule for this, but apparently
-                // for example 2022 they have done it this way
+                // for iof 2022 they have done it this way
                 if((f.size() + nonPositioned.size()) > 100) {
                     // Huge amount of non-positioned, "ö final" becomes
                     // too big -> create yet another for non-positioned

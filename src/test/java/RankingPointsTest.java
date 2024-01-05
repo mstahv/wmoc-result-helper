@@ -1,7 +1,7 @@
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
-import org.example.RankingPointsService;
+import org.orienteering.wmoc.services.RankingPointsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.orienteering.datastandard._3.EntryList;

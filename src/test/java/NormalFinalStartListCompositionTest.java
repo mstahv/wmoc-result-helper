@@ -1,9 +1,9 @@
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
-import org.example.FinalClazz;
-import org.example.FinalRunner;
-import org.example.NormalFinalService;
+import org.orienteering.wmoc.domain.FinalClazz;
+import org.orienteering.wmoc.domain.FinalRunner;
+import org.orienteering.wmoc.services.NormalFinalService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.orienteering.datastandard._3.EntryList;

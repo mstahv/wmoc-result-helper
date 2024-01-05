@@ -1,10 +1,13 @@
-package org.example;
+package org.orienteering.wmoc.services;
 
 import org.orienteering.datastandard._3.Iof3ClassResult;
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Iof3ResultList;
-import org.orienteering.datastandard._3.PersonRaceResult;
-import org.orienteering.datastandard._3.ResultStatus;
+import org.orienteering.wmoc.domain.AgeClass;
+import org.orienteering.wmoc.domain.ClazzQualifier;
+import org.orienteering.wmoc.domain.FinalCompetitor;
+import org.orienteering.wmoc.domain.StartGroup;
+import org.orienteering.wmoc.domain.StartList;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -38,7 +41,7 @@ public class ClassSplitterService {
             AgeClass ageClass = new AgeClass(mainClass);
             for (int i = 0; i < results.size(); i++) {
                 // assumes the age classes are in order in the result file!
-                // for example H55A before H55B
+                // for iof H55A before H55B
                 ClazzQualifier qualifier = ClazzQualifier.values()[i];
                 ageClass.getStartList(qualifier).initFromPersonResults(results.get(i).getPersonResult());
             }
@@ -62,7 +65,7 @@ public class ClassSplitterService {
                 StartList a = ageClass.getStartList(ClazzQualifier.A);
                 StartList b = ageClass.getStartList(ClazzQualifier.B);
 
-                int promotionAmount = (int) Math.floor(a.normalStartGroup.size() * 0.1);
+                int promotionAmount = (int) Math.floor(a.getNormalStartGroup().size() * 0.1);
                 List<FinalCompetitor> relegated = a.pickFromBottom(promotionAmount);
                 b.addRelegated(relegated);
 
@@ -93,11 +96,11 @@ public class ClassSplitterService {
 
                         for (Iof3PersonResult pr : eligibleForFinal) {
                             StartList a = ageClass.getStartList(ClazzQualifier.A);
-                            if (!a.normalStartGroup.contains(pr.getPerson())) {
+                            if (!a.getNormalStartGroup().contains(pr.getPerson())) {
                                 // not in normal start group in A, so must be relegated to B
                                 // lift back to A
                                 System.out.println("Top 4 from qualification always to A rule: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven());
-                                FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).relegated.pick(pr.getPerson());
+                                FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).getRelegated().pick(pr.getPerson());
                                 if(finalCompetitor == null) {
                                     // didn't start in middle final at all -> skip this one
                                     System.out.println(pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven() + " not found in relegated list, most likely didn't start in Middle final at all.");
@@ -116,26 +119,26 @@ public class ClassSplitterService {
         ageClasses.forEach(ageClass -> {
             ageClass.getStartLists().forEach((clazzQualifier, startList) -> {
                 // first the extra starters, e.g. top from qualification, but mp in middle
-                sortStartGroup(startList.extraStarters);
-                startList.extraStarters.forEach(fc -> {
+                sortStartGroup(startList.getExtraStarters());
+                startList.getExtraStarters().forEach(fc -> {
                     printCompetitor(sb, ageClass, clazzQualifier, fc, "extra starter");
                 });
 
                 // thin the promoted, empty for last final
-                sortStartGroup(startList.promoted);
-                startList.promoted.forEach(fc -> {
+                sortStartGroup(startList.getPromoted());
+                startList.getPromoted().forEach(fc -> {
                     printCompetitor(sb, ageClass, clazzQualifier, fc, "promoted");
                 });
 
                 // then print normal start group
-                sortStartGroup(startList.normalStartGroup);
-                startList.normalStartGroup.forEach(fc -> {
+                sortStartGroup(startList.getNormalStartGroup());
+                startList.getNormalStartGroup().forEach(fc -> {
                     printCompetitor(sb, ageClass, clazzQualifier, fc, "normal");
                 });
 
                 // last the relegated, empty for A finals
-                sortStartGroup(startList.relegated);
-                startList.relegated.forEach(fc -> {
+                sortStartGroup(startList.getRelegated());
+                startList.getRelegated().forEach(fc -> {
                     printCompetitor(sb, ageClass, clazzQualifier, fc, "relegated");
                 });
 

@@ -1,4 +1,4 @@
-package org.example;
+package org.orienteering.wmoc.domain;
 
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Person;
@@ -74,5 +74,21 @@ public class StartList {
 
     public FinalCompetitor pick(Person person) {
         return null;
+    }
+
+    public StartGroup getExtraStarters() {
+        return extraStarters;
+    }
+
+    public StartGroup getPromoted() {
+        return promoted;
+    }
+
+    public StartGroup getRelegated() {
+        return relegated;
+    }
+
+    public StartGroup getNormalStartGroup() {
+        return normalStartGroup;
     }
 }

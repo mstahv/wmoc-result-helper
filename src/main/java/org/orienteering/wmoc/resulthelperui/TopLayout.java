@@ -1,4 +1,4 @@
-package org.example;
+package org.orienteering.wmoc.resulthelperui;
 
 import org.vaadin.firitin.appframework.MainLayout;
 

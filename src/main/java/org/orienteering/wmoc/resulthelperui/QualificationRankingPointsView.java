@@ -1,8 +1,7 @@
-package org.example;
+package org.orienteering.wmoc.resulthelperui;
 
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -14,8 +13,9 @@ import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
 import org.orienteering.datastandard._3.Race;
+import org.orienteering.wmoc.domain.QualificationCompetitor;
+import org.orienteering.wmoc.services.RankingPointsService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
-import org.vaadin.firitin.components.RichText;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 import java.io.IOException;

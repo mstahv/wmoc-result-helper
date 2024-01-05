@@ -1,9 +1,8 @@
-package org.example;
+package org.orienteering.wmoc.domain;
 
 import org.orienteering.datastandard._3.Person;
 
 import java.math.BigInteger;
-import java.security.Principal;
 
 public class FinalCompetitor {
     private final Person person;

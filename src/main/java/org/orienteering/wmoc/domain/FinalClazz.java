@@ -1,8 +1,6 @@
-package org.example;
+package org.orienteering.wmoc.domain;
 
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.util.Collections;
 import java.util.List;
 
 public record FinalClazz(String clazzName, List<FinalRunner> runners) {

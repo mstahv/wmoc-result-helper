@@ -1,6 +1,5 @@
-package org.example;
+package org.orienteering.wmoc.domain;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
