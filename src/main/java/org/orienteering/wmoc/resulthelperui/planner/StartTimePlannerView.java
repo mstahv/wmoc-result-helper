@@ -24,6 +24,9 @@ import org.vaadin.firitin.util.style.Padding;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 @Route(layout = TopLayout.class)
 public class StartTimePlannerView extends VerticalLayout {
@@ -85,29 +88,24 @@ public class StartTimePlannerView extends VerticalLayout {
                                 throw new RuntimeException(e);
                             }
                 });
-
-                VUpload upload = new VUpload()
-                        .withAutoUpload(true)
-                        .withDropAllowed(false);
-                MemoryBuffer buffer = new MemoryBuffer();
-                upload.setReceiver(buffer);
-                Button uploadButton = new Button(VaadinIcon.UPLOAD.create());
-                uploadButton.setTooltipText("Upload plan file (.dat)");
-                upload.setUploadButton(uploadButton);
-                upload.addSucceededListener(event -> {
+                
+                UploadFileHandler ufh = new UploadFileHandler((is, filename, mimetype) -> {
                     try {
-                        byte[] bytes = buffer.getInputStream().readAllBytes();
-                        StartTimePlan plan = plannerService.readBackup(bytes);
+                       var plan = plannerService.readBackup(is.readAllBytes());
+                       return () -> {
                         plans.getGenericDataView().refreshAll();
                         plans.setValue(plan);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
+                       };
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
                     }
-                });
+                }).withDragAndDrop(false)
+                        .withUploadButton(new VButton(VaadinIcon.UPLOAD.create())
+                        .withTooltip("Upload plan file (.dat)"));
 
                 planSelector = new VHorizontalLayout()
                         .space()
-                        .withComponents(plans, addPlan, save, backupDownload, upload)
+                        .withComponents(plans, addPlan, save, backupDownload, ufh)
                         .withPadding(Padding.Side.RIGHT)
                         .alignAll(Alignment.CENTER);
                 findAncestor(TopLayout.class).addToNavbar(planSelector);
@@ -165,5 +163,5 @@ public class StartTimePlannerView extends VerticalLayout {
         }
         super.onDetach(detachEvent);
     }
-    
+
 }
