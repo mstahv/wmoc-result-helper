@@ -7,9 +7,9 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
-import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.BeanValidationBinder;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.UIScope;
 import org.orienteering.wmoc.domain.planner.AllPlans;
 import org.orienteering.wmoc.domain.planner.Start;
 import org.orienteering.wmoc.domain.planner.StartTimePlan;
@@ -18,16 +18,14 @@ import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.progressbar.VProgressBar;
-import org.vaadin.firitin.components.upload.VUpload;
+import org.vaadin.firitin.components.upload.UploadFileHandler;
 import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.style.Padding;
 
 import java.io.IOException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.vaadin.firitin.components.upload.UploadFileHandler;
 
+@UIScope
 @Route(layout = TopLayout.class)
 public class StartTimePlannerView extends VerticalLayout {
 
@@ -89,7 +87,7 @@ public class StartTimePlannerView extends VerticalLayout {
                             }
                 });
                 
-                UploadFileHandler ufh = new UploadFileHandler((is, filename, mimetype) -> {
+                UploadFileHandler ufh = new UploadFileHandler((is, md) -> {
                     try {
                        var plan = plannerService.readBackup(is.readAllBytes());
                        return () -> {

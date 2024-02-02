@@ -9,6 +9,7 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.Iof3ResultList;
+import org.orienteering.wmoc.resulthelperui.planner.PlanSelect;
 import org.orienteering.wmoc.services.ClassSplitterService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
@@ -16,8 +17,7 @@ import org.vaadin.firitin.components.upload.UploadFileHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 
-@Route(layout = TopLayout.class)
-public class ForestFinalView extends VerticalLayout {
+public class ForestFinalView extends AbstractCalculatorView {
 
     private final Pre preview = new Pre();
     private final DynamicFileDownloader download = new DynamicFileDownloader("Download CSV", "finals.csv", (OutputStream stream) -> {
@@ -29,11 +29,14 @@ public class ForestFinalView extends VerticalLayout {
     });
     private final Unmarshaller unmarshaller;
     private final Button button;
+    private final PlanSelect planSelect;
     private Iof3ResultList qualResults;
     private Iof3ResultList middleResults;
 
-    public ForestFinalView() {
+    public ForestFinalView(PlanSelect planSelect) {
+        this.planSelect = planSelect;
         add("This view makes the magical promotions/relegations for forest final");
+        add(planSelect);
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(Iof3ResultList.class);
@@ -46,9 +49,10 @@ public class ForestFinalView extends VerticalLayout {
 
         VerticalLayout controls = new VerticalLayout();
         button = new Button("Split to finals", e -> {
-            String startlist = ClassSplitterService.splitToFinals(qualResults, middleResults);
+            String startlist = ClassSplitterService.splitToFinals(qualResults, middleResults, planSelect.getValue(), getErrors());
             preview.setText(startlist);
             download.setEnabled(true);
+            notifyErrors();
         });
         button.setEnabled(false);
 
@@ -61,7 +65,7 @@ public class ForestFinalView extends VerticalLayout {
             getUI().ifPresent(ui -> ui.access(() -> {
                 checkButtonValidity();
             }));
-        });
+        }).withClearAutomatically(false);
 
         UploadFileHandler uploadQual = new UploadFileHandler((content, fileName, mimeType) -> {
             try {
@@ -72,7 +76,7 @@ public class ForestFinalView extends VerticalLayout {
             getUI().ifPresent(ui -> ui.access(() -> {
                 checkButtonValidity();
             }));
-        });
+        }).withClearAutomatically(false);
 
         controls.add(
                 new H3("Middle results (IOF3):"),

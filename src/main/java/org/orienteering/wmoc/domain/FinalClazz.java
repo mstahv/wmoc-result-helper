@@ -1,12 +1,30 @@
 package org.orienteering.wmoc.domain;
 
 import java.io.PrintStream;
+import java.time.LocalTime;
 import java.util.List;
 
 public record FinalClazz(String clazzName, List<FinalRunner> runners) {
-    public void printCsv(PrintStream out) {
-        final String DELIM = ";";
+    static final String DELIM = ";";
+
+    public static void printCsvHeader(PrintStream out) {
+        out.print("Starttime");
+        out.print(DELIM);
+        out.print("Class");
+        out.print(DELIM);
+        out.print("IOFID");
+        out.print(DELIM);
+        out.print("Name");
+        out.print(DELIM);
+        out.print("Class/pos in qualification");
+        out.println(DELIM);
+    }
+
+    public LocalTime printCsv(PrintStream out, LocalTime ns, int startInterval) {
+
         for (FinalRunner r : runners) {
+            out.print(ns);
+            out.print(DELIM);
             out.print(clazzName);
             out.print(DELIM);
             out.print(r.iofId());
@@ -15,6 +33,8 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
             out.print(DELIM);
             out.print(r.qualClazz());
             out.println(DELIM);
+            ns = ns.plusSeconds(startInterval);
         }
+        return ns;
     }
 }

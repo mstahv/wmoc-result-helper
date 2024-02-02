@@ -10,6 +10,7 @@ import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
 
 import java.io.File;
+import java.time.LocalTime;
 import java.util.List;
 
 public class NormalFinalStartListCompositionTest {
@@ -36,7 +37,7 @@ public class NormalFinalStartListCompositionTest {
         }
 
         for (FinalClazz fc : finals) {
-            fc.printCsv(System.out);
+            fc.printCsv(System.out, LocalTime.of(0,0), 60);
         }
 
     }
