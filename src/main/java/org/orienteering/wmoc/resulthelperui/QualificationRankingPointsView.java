@@ -124,9 +124,9 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                     });
                 });
             } else {
-                sb.append("Starttime");
-                sb.append(";");
                 sb.append("Class");
+                sb.append(";");
+                sb.append("Starttime");
                 sb.append(";");
                 sb.append("IOFID");
                 sb.append(";");
@@ -144,9 +144,9 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
 
                                 for (QualificationCompetitor c : qualificationCompetitors) {
                                     sb
-                                            .append(startTime)
-                                            .append(";")
                                             .append(clazz.getName())
+                                            .append(";")
+                                            .append(startTime)
                                             .append(";")
                                             .append(c.iofId())
                                             .append(";")

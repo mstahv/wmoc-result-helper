@@ -8,11 +8,11 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
     static final String DELIM = ";";
 
     public static void printCsvHeader(PrintStream out) {
-        out.print("Starttime");
-        out.print(DELIM);
         out.print("Class");
         out.print(DELIM);
-        out.print("IOFID");
+        out.print("Starttime");
+        out.print(DELIM);
+        out.print("IOF ID");
         out.print(DELIM);
         out.print("Name");
         out.print(DELIM);
@@ -23,9 +23,9 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
     public LocalTime printCsv(PrintStream out, LocalTime ns, int startInterval) {
 
         for (FinalRunner r : runners) {
-            out.print(ns);
-            out.print(DELIM);
             out.print(clazzName);
+            out.print(DELIM);
+            out.print(ns);
             out.print(DELIM);
             out.print(r.iofId());
             out.print(DELIM);
