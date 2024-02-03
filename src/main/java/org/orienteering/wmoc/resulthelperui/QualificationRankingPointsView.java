@@ -86,16 +86,10 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                 throw new RuntimeException(e);
             }
             getUI().ifPresent(ui -> ui.access(() -> {
-                Select<Race> raceSelect = new Select<>();
-                raceSelect.setItems(entryList.getEvent().getRace());
-                raceSelect.setItemLabelGenerator(r -> r.getName());
-                Dialog dialog = new Dialog(new H3("Choose race:"), raceSelect);
-                raceSelect.addValueChangeListener(e -> {
-                    raceId = e.getValue().getRaceNumber().intValue();
+                RaceSelector.promptRaceId(entryList, id -> {
+                    this.raceId = id;
                     checkButtonValidity();
-                    dialog.close();
                 });
-                dialog.open();
             }));
         }).withClearAutomatically(false);
 

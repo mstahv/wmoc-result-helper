@@ -15,6 +15,7 @@ import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlType;
 
@@ -69,6 +70,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "entryTime",
     "extensions"
 })
+@XmlRootElement
 public class PersonEntry {
 
     @XmlElement(name = "Id")
@@ -84,7 +86,7 @@ public class PersonEntry {
     @XmlElement(name = "Class")
     protected List<Class> clazz;
     @XmlElement(name = "RaceNumber")
-    protected List<BigInteger> raceNumber;
+    protected List<Integer> raceNumber;
     @XmlElement(name = "AssignedFee")
     protected List<AssignedFee> assignedFee;
     @XmlElement(name = "ServiceRequest")
@@ -289,7 +291,7 @@ public class PersonEntry {
      * @return
      *     The value of the raceNumber property.
      */
-    public List<BigInteger> getRaceNumber() {
+    public List<Integer> getRaceNumber() {
         if (raceNumber == null) {
             raceNumber = new ArrayList<>();
         }

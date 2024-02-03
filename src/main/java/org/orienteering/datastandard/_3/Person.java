@@ -347,4 +347,37 @@ public class Person {
     public int hashCode() {
         return id.get(0).getValue().hashCode();
     }
+
+    public boolean nameAndBirthDayEquals(Person person) {
+        if(person != null) {
+            String xmlFormat = getBirthDate().toXMLFormat();
+            String string = person.getBirthDate().toXMLFormat();
+            boolean bdEquals = getBirthDate().toString().equals(person.getBirthDate().toString());
+            return
+                getName().getFamily().equals(person.getName().getFamily()) &&
+                        getName().getGiven().equals(person.getName().getGiven()) &&
+                        bdEquals
+                    ;
+        }
+        return false;
+    }
+
+    public boolean nameEquals(Person person) {
+        if(person != null) {
+            boolean family = getName().getFamily().equals(person.getName().getFamily());
+            boolean given = getName().getGiven().equals(person.getName().getGiven());
+            return family
+                 &&
+                   given
+                ;
+        }
+        return false;
+    }
+
+    public boolean idEquals(Person person) {
+        if(person != null) {
+            return getId().get(0).getValue().equals(person.getId().get(0).getValue());
+        }
+        return false;
+    }
 }
