@@ -134,6 +134,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
 
         entryGrid.asSingleSelect().addValueChangeListener(e -> {
             PersonEntry personEntry = e.getValue();
+            if(personEntry == null) {
+                return;
+            }
             // TODO figure out a good way to show
             Dialog dialog = new Dialog("Details for " + personEntry.getId().getValue());
 
