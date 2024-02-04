@@ -9,6 +9,8 @@ package org.orienteering.datastandard._3;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlElement;
@@ -108,4 +110,7 @@ public class PersonServiceRequest {
         return this.serviceRequest;
     }
 
+    public Optional<ServiceRequest> findByService(Service s) {
+         return getServiceRequest().stream().filter(sr -> sr.getService().equals(s)).findFirst();
+    }
 }

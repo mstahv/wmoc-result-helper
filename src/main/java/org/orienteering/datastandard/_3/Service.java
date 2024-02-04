@@ -318,4 +318,17 @@ public class Service {
         this.modifyTime = value;
     }
 
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Service s) {
+            return getId().getValue().equals(s.getId().getValue());
+        }
+        return super.equals(obj);
+    }
+
+    @Override
+    public int hashCode() {
+        return getId().getValue().hashCode();
+    }
 }
