@@ -44,6 +44,7 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -69,8 +70,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     MultiSelectListBox<Service> services = new VMultiSelectListBox();
     Checkbox sprint = new VCheckBox("Sprint").withValueChangeListener(e -> filterReport());
     private TextField textFilter = new VTextField()
+            .withWidth("250px")
             .withClearButtonVisible(true)
-            .withPlaceholder("Freetext filter")
+            .withPlaceholder("Freetext filters, ; for AND")
             .withValueChangeListener(e -> filterReport());
     Checkbox forest = new VCheckBox("Forest").withValueChangeListener(e -> filterReport());
     private ServiceRequestList srl;
@@ -280,31 +282,35 @@ public class RegistrationVieverView extends AbstractCalculatorView {
         if (el != null) {
             List<PersonEntry> personEntry = new ArrayList<>(el.getPersonEntry());
             if (!textFilter.isEmpty()) {
-                String f = textFilter.getValue();
+                String[] filters = textFilter.getValue().split(";");
                 personEntry = personEntry.stream().filter(pe -> {
-                    if (pe.getPerson().getId().get(0).getValue().contains(f)) {
-                        return true;
+                    for(int i = 0; i < filters.length; i++) {
+                        String f = filters[i];
+                        if (pe.getPerson().getId().get(0).getValue().contains(f)) {
+                            continue;
+                        }
+                        if (pe.getPerson().getName().getFamily().contains(f)) {
+                            continue;
+                        }
+                        if (pe.getPerson().getName().getGiven().contains(f)) {
+                            continue;
+                        }
+                        if (pe.getClazz().get(0).getName().contains(f)) {
+                            continue;
+                        }
+                        if (pe.getPerson().getNationality().getValue().contains(f)) {
+                            continue;
+                        }
+                        String cCard = "--not known--";
+                        if (!pe.getControlCard().isEmpty()) {
+                            cCard = pe.getControlCard().get(0).getValue();
+                        }
+                        if (cCard.contains(f)) {
+                            continue;
+                        }
+                        return false;
                     }
-                    if (pe.getPerson().getName().getFamily().contains(f)) {
-                        return true;
-                    }
-                    if (pe.getPerson().getName().getGiven().contains(f)) {
-                        return true;
-                    }
-                    if (pe.getClazz().get(0).getName().contains(f)) {
-                        return true;
-                    }
-                    if (pe.getPerson().getNationality().getValue().contains(f)) {
-                        return true;
-                    }
-                    String cCard = "--not known--";
-                    if(!pe.getControlCard().isEmpty()) {
-                        cCard = pe.getControlCard().get(0).getValue();
-                    }
-                    if (cCard.contains(f)) {
-                        return true;
-                    }
-                    return false;
+                    return true;
                 }).toList();
             }
             if (!services.getValue().isEmpty()) {
