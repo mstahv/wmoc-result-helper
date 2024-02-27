@@ -31,6 +31,7 @@ import org.orienteering.datastandard._3.ServiceRequest;
 import org.orienteering.datastandard._3.ServiceRequestList;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
+import org.vaadin.firitin.components.grid.VGrid;
 import org.vaadin.firitin.components.listbox.VMultiSelectListBox;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.orderedlayout.VVerticalLayout;
@@ -61,7 +62,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     });
     private final Unmarshaller unmarshaller;
     private final Marshaller marshaller;
-    Grid<PersonEntry> entryGrid = new Grid<>();
+    VGrid<PersonEntry> entryGrid = new VGrid<>();
     Map<PersonEntry, EmitReservation> emitResCache = new HashMap<>();
     Map<PersonEntry, Optional<PersonServiceRequest>> personServiceRequestMap = new HashMap<>();
     Div count = new Div();
@@ -260,6 +261,8 @@ public class RegistrationVieverView extends AbstractCalculatorView {
             Grid.Column<PersonEntry> forest = entryGrid.addColumn(pe -> {
                 return pe.getRaceNumber().contains(3) ? "X" : "";
             }).setHeader("Forest").setSortable(true);
+            entryGrid.addColumn(pe -> pe.getPerson().getNationality().getValue())
+                    .setHeader("Nationality");
 
             entryGrid.getColumns().forEach(c -> c.setAutoWidth(true));
 
@@ -267,6 +270,8 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                 addServiceColumns();
             }
             filterReport();
+            entryGrid.withColumnSelector();
+
         }
 
     }
@@ -289,7 +294,14 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                     if (pe.getClazz().get(0).getName().contains(f)) {
                         return true;
                     }
-                    if (!pe.getControlCard().isEmpty() && pe.getControlCard().get(0).getValue().contains(f)) {
+                    if (pe.getPerson().getNationality().getValue().contains(f)) {
+                        return true;
+                    }
+                    String cCard = "--not known--";
+                    if(!pe.getControlCard().isEmpty()) {
+                        cCard = pe.getControlCard().get(0).getValue();
+                    }
+                    if (cCard.contains(f)) {
                         return true;
                     }
                     return false;
