@@ -8,7 +8,6 @@ import org.orienteering.wmoc.domain.ClazzQualifier;
 import org.orienteering.wmoc.domain.FinalClazz;
 import org.orienteering.wmoc.domain.FinalRunner;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -174,7 +173,7 @@ public class NormalFinalService {
             while(iterator.hasNext() ) {
                 Iof3PersonResult pr = iterator.next();
                 PersonRaceResult prr = pr.getResult().get(0);
-                BigInteger position = prr.getPosition();
+                Integer position = prr.getPosition();
                 if (position != null) {
                     hasResults = true;
                     if(position.intValue() == pos) {

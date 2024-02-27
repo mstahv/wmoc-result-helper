@@ -4,7 +4,6 @@ import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
 import org.orienteering.wmoc.domain.QualificationCompetitor;
 
-import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -20,7 +19,7 @@ public class RankingPointsService {
             iof3ResultList.getClassResult().forEach(classResult -> {
                 classResult.getPersonResult().forEach(personResult -> {
                     String iofId = personResult.getPerson().getId().get(0).getValue();
-                    BigInteger position = personResult.getResult().get(0).getPosition();
+                    Integer position = personResult.getResult().get(0).getPosition();
                     if(position != null) {
                         int pos = position.intValue();
                         // first one gets 20 points, second 19, etc.
@@ -42,7 +41,7 @@ public class RankingPointsService {
         Map<String, List<QualificationCompetitor>> heatToCompetitor = new TreeMap<>();
 
         entryList.getPersonEntry().forEach(personEntry -> {
-            if(personEntry.getRaceNumber().contains(new BigInteger(String.valueOf(raceId)))) {
+            if(personEntry.getRaceNumber().contains(Integer.valueOf(raceId))) {
                 String iofId = personEntry.getPerson().getId().get(0).getValue();
                 String clazz = personEntry.getClazz().get(0).getName();
                 classToCompetitor.computeIfAbsent(clazz, k -> new ArrayList<>()).add(

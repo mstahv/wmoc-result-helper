@@ -12,7 +12,7 @@ public class FinalCompetitor {
 
     private ClazzQualifier middleFinalClass;
 
-    public FinalCompetitor(Person person, BigInteger position, Double time, ClazzQualifier middleFinalClass) {
+    public FinalCompetitor(Person person, Integer position, Double time, ClazzQualifier middleFinalClass) {
         this.person = person;
         if(time != null) {
             this.time = (int) (time.doubleValue()*100); // 100ths of a second

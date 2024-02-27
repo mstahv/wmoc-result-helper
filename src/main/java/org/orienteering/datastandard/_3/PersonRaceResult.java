@@ -7,16 +7,16 @@
 
 package org.orienteering.datastandard._3;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.datatype.XMLGregorianCalendar;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlSchemaType;
 import jakarta.xml.bind.annotation.XmlType;
+
+import javax.xml.datatype.XMLGregorianCalendar;
+import java.util.ArrayList;
+import java.util.List;
 
 
 /**
@@ -94,7 +94,7 @@ public class PersonRaceResult {
     @XmlElement(name = "TimeBehind")
     protected Double timeBehind;
     @XmlElement(name = "Position")
-    protected BigInteger position;
+    protected Integer position;
     @XmlElement(name = "Status", required = true)
     @XmlSchemaType(name = "NMTOKEN")
     protected ResultStatus status;
@@ -119,7 +119,7 @@ public class PersonRaceResult {
     @XmlElement(name = "Extensions")
     protected Extensions extensions;
     @XmlAttribute(name = "raceNumber")
-    protected BigInteger raceNumber;
+    protected Integer raceNumber;
 
     /**
      * Gets the value of the bibNumber property.
@@ -246,10 +246,10 @@ public class PersonRaceResult {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Integer }
      *     
      */
-    public BigInteger getPosition() {
+    public Integer getPosition() {
         return position;
     }
 
@@ -258,10 +258,10 @@ public class PersonRaceResult {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Integer }
      *     
      */
-    public void setPosition(BigInteger value) {
+    public void setPosition(Integer value) {
         this.position = value;
     }
 
@@ -576,10 +576,10 @@ public class PersonRaceResult {
      * 
      * @return
      *     possible object is
-     *     {@link BigInteger }
+     *     {@link Integer }
      *     
      */
-    public BigInteger getRaceNumber() {
+    public Integer getRaceNumber() {
         return raceNumber;
     }
 
@@ -588,10 +588,10 @@ public class PersonRaceResult {
      * 
      * @param value
      *     allowed object is
-     *     {@link BigInteger }
+     *     {@link Integer }
      *     
      */
-    public void setRaceNumber(BigInteger value) {
+    public void setRaceNumber(Integer value) {
         this.raceNumber = value;
     }
 
