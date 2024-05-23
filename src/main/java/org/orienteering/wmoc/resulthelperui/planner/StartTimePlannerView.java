@@ -19,6 +19,7 @@ import org.vaadin.firitin.components.button.VButton;
 import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
 import org.vaadin.firitin.components.progressbar.VProgressBar;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
+import org.vaadin.firitin.util.BrowserPrompt;
 import org.vaadin.firitin.util.VStyleUtil;
 import org.vaadin.firitin.util.style.Padding;
 
@@ -127,7 +128,18 @@ public class StartTimePlannerView extends VerticalLayout {
                     plans.setValue(plans.getGenericDataView().getItem(0));
                 });
 
-        add(new VHorizontalLayout(planName, remove));
+        Button setAllIntervals = new VButton("Set interval for all classes...", () -> {
+            BrowserPrompt.promptInteger("New interval for all classes?")
+                    .thenAccept(interval -> {
+                        StartTimePlan plan = binder.getBean();
+                        plan.setIntervalForAll(interval);
+                        // rebuild view
+                        edit(plan);
+                    });
+
+        });
+
+        add(new VHorizontalLayout(planName, remove, setAllIntervals));
         binder.bindInstanceFields(this);
         binder.setBean(startTimePlan);
 

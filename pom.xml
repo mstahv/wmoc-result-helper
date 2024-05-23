@@ -9,7 +9,7 @@
 
     <properties>
         <java.version>21</java.version>
-        <vaadin.version>24.3.10</vaadin.version>
+        <vaadin.version>24.3.12</vaadin.version>
     </properties>
 
     <parent>
@@ -68,7 +68,7 @@
         <dependency>
             <groupId>org.eclipse.serializer</groupId>
             <artifactId>serializer</artifactId>
-            <version>1.0.0</version>
+            <version>1.1.0</version>
         </dependency>
     </dependencies>
 

@@ -25,4 +25,16 @@ public class StartTimePlan {
     public void setStarts(List<Start> starts) {
         this.starts = starts;
     }
+
+    public void setIntervalForAll(int interval) {
+        starts.forEach(s -> {
+            s.startQueues.forEach(clazz -> {
+                clazz.setStartInterval(interval);
+                while(clazz.getNextClazz() != null) {
+                    clazz = clazz.getNextClazz();
+                    clazz.setStartInterval(interval);
+                }
+            });
+        });
+    }
 }

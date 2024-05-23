@@ -6,8 +6,10 @@ import com.vaadin.flow.spring.annotation.UIScope;
 import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.eclipse.serializer.Serializer;
 import org.eclipse.serializer.SerializerFoundation;
+import org.eclipse.serializer.persistence.types.PersistenceLegacyTypeMappingResultor;
 import org.orienteering.wmoc.domain.planner.AllPlans;
 import org.orienteering.wmoc.domain.planner.Clazz;
+import org.orienteering.wmoc.domain.planner.Start;
 import org.orienteering.wmoc.domain.planner.StartTimePlan;
 import org.springframework.stereotype.Component;
 
@@ -32,7 +34,8 @@ public class PlannerService {
         foundation.registerEntityTypes(
                 AllPlans.class,
                 Clazz.class,
-                StartTimePlan.class
+                StartTimePlan.class,
+                Start.class
         );
 
         serializer = Serializer.Bytes(foundation);

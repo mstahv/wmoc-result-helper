@@ -27,6 +27,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -101,7 +102,7 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
 
             StartTimePlan plan = planSelect.getValue();
             if (plan == null) {
-                Notification.show("No, plan selected, just showring runners");
+                Notification.show("No, plan selected, just showing runners");
                 classToRunners.forEach((clazz, cList) -> {
                     cList.forEach(c -> {
                         sb.append(clazz)
@@ -126,6 +127,12 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                 sb.append(";");
                 sb.append("Name");
                 sb.append(";");
+                sb.append("Nationality");
+                sb.append(";");
+                sb.append("Club");
+                sb.append(";");
+                sb.append("Emit");
+                sb.append(";");
                 sb.append("Points");
                 sb.append(";\n");
                 List<Start> starts = plan.getStarts();
@@ -135,6 +142,7 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                         while (clazz != null) {
                             List<QualificationCompetitor> qualificationCompetitors = classToRunners.get(clazz.getName());
                             if (qualificationCompetitors != null) {
+                                Collections.shuffle(qualificationCompetitors);
 
                                 for (QualificationCompetitor c : qualificationCompetitors) {
                                     sb
@@ -147,6 +155,12 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                                             .append(c.name().getGiven())
                                             .append(" ")
                                             .append(c.name().getFamily())
+                                            .append(";")
+                                            .append(c.nationality())
+                                            .append(";")
+                                            .append(c.club())
+                                            .append(";")
+                                            .append(c.emit())
                                             .append(";")
                                             .append(c.points())
                                             .append("\n");

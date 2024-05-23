@@ -44,12 +44,20 @@ public class RankingPointsService {
             if(personEntry.getRaceNumber().contains(Integer.valueOf(raceId))) {
                 String iofId = personEntry.getPerson().getId().get(0).getValue();
                 String clazz = personEntry.getClazz().get(0).getName();
+                String emit = "";
+                if(!personEntry.getControlCard().isEmpty()) {
+                    emit = personEntry.getControlCard().get(0).getValue() +"";
+                }
+                String club = personEntry.getOrganisation().getName();
                 classToCompetitor.computeIfAbsent(clazz, k -> new ArrayList<>()).add(
+
                         new QualificationCompetitor(iofId,
                                 personEntry.getPerson().getName(),
                                 clazz,
                                 personEntry.getPerson().getNationality().getCode(),
-                                iofIdToPoints.getOrDefault(iofId,0)
+                                iofIdToPoints.getOrDefault(iofId,0),
+                                emit,
+                                club
                         )
                 );
             }
@@ -85,21 +93,14 @@ public class RankingPointsService {
             }
             for (int i = 0; i < heats.size(); i++) {
                 List<QualificationCompetitor> competitorList = heats.get(i);
+                // Not randomising here so analysing the correct order is easier,
+                // Rudely the view shuffles if start times for classes chosen
                 //Collections.shuffle(competitorList);
                 heatToCompetitor.put(clazz + "-" + (i+1), competitorList);
             }
         });
 
         return heatToCompetitor;
-    }
-
-    public static Map<String, List<QualificationCompetitor>> calculateFinalStartLists(Iof3ResultList qualResults, EntryList entryList, Integer raceId) {
-
-
-
-
-
-        return Collections.emptyMap();
     }
 
 }

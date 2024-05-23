@@ -1,6 +1,5 @@
 package org.orienteering.wmoc.resulthelperui.planner;
 
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dialog.Dialog;
@@ -60,6 +59,11 @@ public class ClazzCard extends Div {
         Icon dragHandle = VaadinIcon.MENU.create();
         dragHandle.setColor("gray");
         dragHandle.getStyle().setMarginRight("0.5em");
+        dragHandle.setTooltipText("""
+            Dragging on top of another class moves the class (and next classes in the queue) to start after it.
+            Dragging over the "start area" creates a new queue from the current class (and possible queued classes).
+            Dragging queue root on top of itself DELETES the queue.
+        """);
 
         DropTarget<HorizontalLayout> target = DropTarget.create(mainArea);
         target.addDropListener(e -> {
@@ -85,6 +89,9 @@ public class ClazzCard extends Div {
 
                 init();
                 Notification.show("Dropped on card " + c.getName());
+                if(c.isQueueRoot() && draggedCard == this) {
+                    Notification.show("Deleted");
+                }
             });
 
         });

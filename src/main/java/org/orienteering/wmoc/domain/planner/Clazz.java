@@ -35,7 +35,7 @@ public class Clazz {
             throw new IllegalStateException("Already starts after given class!");
         }
         if(this == newStartsAfter) {
-            throw new IllegalStateException("Can't queue after itself!");
+            throw new IllegalStateException("Dropped on itself");
         }
         if(isQueueRoot() && nextClazz != null) {
             // Move the roots start time to the new root
@@ -129,4 +129,5 @@ public class Clazz {
     public void setStart(Start start) {
         this.start = start;
     }
+
 }
