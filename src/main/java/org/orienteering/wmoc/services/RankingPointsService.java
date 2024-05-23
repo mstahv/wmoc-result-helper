@@ -48,7 +48,10 @@ public class RankingPointsService {
                 if(!personEntry.getControlCard().isEmpty()) {
                     emit = personEntry.getControlCard().get(0).getValue() +"";
                 }
-                String club = personEntry.getOrganisation().getName();
+                String club = "";
+                if(personEntry.getOrganisation() != null) {
+                    club = personEntry.getOrganisation().getName();
+                }
                 classToCompetitor.computeIfAbsent(clazz, k -> new ArrayList<>()).add(
 
                         new QualificationCompetitor(iofId,
