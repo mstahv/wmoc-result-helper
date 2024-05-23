@@ -82,6 +82,7 @@ public class StartCard extends VerticalLayout implements DropTarget<StartCard> {
                     queue.add(clazzCard);
                     startqueues.add(queue);
                     clazzCard.focus();
+                    clazzCard.scrollIntoView();
                 }));
 
         add(startqueues);
@@ -107,6 +108,9 @@ public class StartCard extends VerticalLayout implements DropTarget<StartCard> {
                 return cc.getClazz() == clazz;
             }
             return false;
-        }).map(c -> (ClazzCard) c).findFirst().ifPresent(c -> c.focus());
+        }).map(c -> (ClazzCard) c).findFirst().ifPresent(c -> {
+            c.focus();
+            c.scrollIntoView();
+        });
     }
 }
