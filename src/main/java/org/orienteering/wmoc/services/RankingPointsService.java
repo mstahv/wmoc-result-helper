@@ -54,7 +54,9 @@ public class RankingPointsService {
                 }
                 classToCompetitor.computeIfAbsent(clazz, k -> new ArrayList<>()).add(
 
-                        new QualificationCompetitor(iofId,
+                        new QualificationCompetitor(
+                                iofId,
+                                personEntry.getId().getValue(),
                                 personEntry.getPerson().getName(),
                                 clazz,
                                 personEntry.getPerson().getNationality().getCode(),

@@ -125,6 +125,8 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                 sb.append(";");
                 sb.append("IOFID");
                 sb.append(";");
+                sb.append("bib");
+                sb.append(";");
                 sb.append("Name");
                 sb.append(";");
                 sb.append("Nationality");
@@ -151,6 +153,8 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                                             .append(startTime)
                                             .append(";")
                                             .append(c.iofId())
+                                            .append(";")
+                                            .append(c.bibNumber())
                                             .append(";")
                                             .append(c.name().getGiven())
                                             .append(" ")
