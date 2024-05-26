@@ -11,12 +11,12 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
+import com.vaadin.flow.spring.annotation.SpringComponent;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -29,6 +29,7 @@ import org.orienteering.datastandard._3.PersonServiceRequest;
 import org.orienteering.datastandard._3.Service;
 import org.orienteering.datastandard._3.ServiceRequest;
 import org.orienteering.datastandard._3.ServiceRequestList;
+import org.orienteering.wmoc.services.StartTimeService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.checkbox.VCheckBox;
 import org.vaadin.firitin.components.grid.VGrid;
@@ -44,7 +45,6 @@ import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -63,6 +63,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     });
     private final Unmarshaller unmarshaller;
     private final Marshaller marshaller;
+    private final StartTimeService startTimeService;
     VGrid<PersonEntry> entryGrid = new VGrid<>();
     Map<PersonEntry, EmitReservation> emitResCache = new HashMap<>();
     Map<PersonEntry, Optional<PersonServiceRequest>> personServiceRequestMap = new HashMap<>();
@@ -77,8 +78,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     Checkbox forest = new VCheckBox("Forest").withValueChangeListener(e -> filterReport());
     private ServiceRequestList srl;
     private EntryList el;
-    public RegistrationVieverView() {
-        add("View & export entries & services in IOF XML format, upload at least entries, more data with services xml.");
+    public RegistrationVieverView(StartTimeService startTimeService) {
+        this.startTimeService = startTimeService;
+        add("View & export entries & services in IOF XML format, upload at least entries, more data with services xml. Start times available for %s races".formatted(startTimeService.getRaceCount()));
         JAXBContext jaxbContext = null;
         try {
             jaxbContext = JAXBContext.newInstance(Iof3ResultList.class, EntryList.class);
@@ -170,13 +172,10 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     private void addServiceColumns() {
         if (srl != null) {
             LinkedHashMap<Integer, Service> idToService = new LinkedHashMap<>();
+            List<Service> services = el.getEvent().getService();
             // collect all services...
-            for (PersonServiceRequest psr : srl.getPersonServiceRequest()) {
-                for (ServiceRequest sr : psr.getServiceRequest()) {
-                    Service service = sr.getService();
-                    int id = Integer.parseInt(service.getId().getValue());
-                    idToService.put(id, service);
-                }
+            for(Service s : services) {
+                idToService.put(Integer.parseInt(s.getId().getValue()), s);
             }
             for (Service s : idToService.values()) {
                 entryGrid.addColumn(pe -> {
@@ -188,7 +187,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                     return "";
                 }).setHeader(s.getName().get(0).getValue());
             }
-            services.setItems(idToService.values());
+            this.services.setItems(idToService.values());
         }
     }
 
@@ -223,6 +222,21 @@ public class RegistrationVieverView extends AbstractCalculatorView {
         if (el != null) {
             entryGrid.removeAllColumns();
             entryGrid.addColumn(pe -> pe.getPerson().getId().get(0).getValue()).setHeader("IOF Id");
+            if(startTimeService.getRaceCount() > 0) {
+                // expects bibs calculated if start times available
+                entryGrid.addColumn(pe -> pe.getId().getValue()).setHeader("Bib");
+                // Sorry for further maintainers, this section is hardcoded, might not match in the future
+                final int SQ = 1;
+                final int FQ = 3;
+                entryGrid.addColumn(pe -> {
+                    String iofId = pe.getPerson().getId().get(0).getValue();
+                    return startTimeService.getStartTime(SQ, iofId);
+                }).setHeader("Start SQ");
+                entryGrid.addColumn(pe -> {
+                    String iofId = pe.getPerson().getId().get(0).getValue();
+                    return startTimeService.getStartTime(FQ, iofId);
+                }).setHeader("Start FQ");
+            }
             entryGrid.addColumn(pe -> {
                 return pe.getClazz().get(0).getName();
             }).setHeader("Class").setSortable(true);

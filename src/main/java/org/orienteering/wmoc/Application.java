@@ -1,4 +1,4 @@
-package org.orienteering.wmoc.resulthelperui;
+package org.orienteering.wmoc;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

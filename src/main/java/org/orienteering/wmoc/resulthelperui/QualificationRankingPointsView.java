@@ -1,25 +1,21 @@
 package org.orienteering.wmoc.resulthelperui;
 
 import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.notification.Notification;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.router.Route;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
-import org.orienteering.datastandard._3.Race;
 import org.orienteering.wmoc.domain.QualificationCompetitor;
 import org.orienteering.wmoc.domain.planner.Clazz;
 import org.orienteering.wmoc.domain.planner.Start;
 import org.orienteering.wmoc.domain.planner.StartTimePlan;
 import org.orienteering.wmoc.resulthelperui.planner.PlanSelect;
 import org.orienteering.wmoc.services.RankingPointsService;
+import org.orienteering.wmoc.services.StartTimeService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
@@ -47,7 +43,7 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
     private EntryList entryList;
     private ArrayList<Iof3ResultList> previousYearResults = new ArrayList<>();
 
-    public QualificationRankingPointsView(PlanSelect planSelect) {
+    public QualificationRankingPointsView(PlanSelect planSelect, StartTimeService startTimeService) {
         add("This view calculates ranking points from n last year results, and generates even qualification heats based on them and countries.");
 
         add(planSelect);
@@ -168,6 +164,7 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                                             .append(";")
                                             .append(c.points())
                                             .append("\n");
+                                    startTimeService.saveStartTime(raceId, c.iofId(), startTime);
                                     startTime = startTime.plusSeconds(clazz.getStartInterval());
                                 }
                             } else {
