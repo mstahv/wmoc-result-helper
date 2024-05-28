@@ -181,8 +181,11 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                 entryGrid.addColumn(pe -> {
                     Optional<PersonServiceRequest> personServiceRequest = getPersonServiceRequest(pe);
                     if (personServiceRequest.isPresent()) {
-                        return personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue()))
-                                .findFirst().isPresent() ? "X" : "";
+                        long counted = personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue())).count();
+                        if(counted == 0) {
+                            return "";
+                        }
+                        return counted;
                     }
                     return "";
                 }).setHeader(s.getName().get(0).getValue());
@@ -272,10 +275,10 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                 return span;
             })).setHeader("ControlCard").setSortable(true);
             entryGrid.addColumn(pe -> {
-                return pe.getRaceNumber().contains(1) ? "X" : "";
+                return pe.getRaceNumber().contains(1) ? "1" : "";
             }).setHeader("Sprint").setSortable(true);
             Grid.Column<PersonEntry> forest = entryGrid.addColumn(pe -> {
-                return pe.getRaceNumber().contains(3) ? "X" : "";
+                return pe.getRaceNumber().contains(3) ? "1" : "";
             }).setHeader("Forest").setSortable(true);
             entryGrid.addColumn(pe -> pe.getPerson().getNationality().getValue())
                     .setHeader("Nationality");
