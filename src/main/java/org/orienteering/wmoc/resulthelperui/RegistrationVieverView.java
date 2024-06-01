@@ -11,6 +11,7 @@ import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.listbox.MultiSelectListBox;
+import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
@@ -21,6 +22,14 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.orienteering.datastandard._3.ControlCard;
 import org.orienteering.datastandard._3.EntryList;
 import org.orienteering.datastandard._3.Iof3ResultList;
@@ -77,6 +86,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
             .withValueChangeListener(e -> filterReport());
     Checkbox forest = new VCheckBox("Forest").withValueChangeListener(e -> filterReport());
     private ServiceRequestList srl;
+    record ServiceOrder(int amout, double balance) {}
+    private Map<String,Map<String,ServiceOrder>> iofIdToServiceToOrder= new HashMap<>();
+
     private EntryList el;
     public RegistrationVieverView(StartTimeService startTimeService) {
         this.startTimeService = startTimeService;
@@ -94,6 +106,42 @@ public class RegistrationVieverView extends AbstractCalculatorView {
         }
 
         UploadFileHandler uploadFileHandler = new UploadFileHandler((content, m) -> {
+            String mimeType = m.mimeType();
+
+            if("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(mimeType)) {
+                iofIdToServiceToOrder.clear();
+                Workbook wb = new XSSFWorkbook(content);
+                Sheet entries = wb.getSheet("Service orders");
+                int row = 1;
+                int lastRowNum = entries.getLastRowNum();
+                while(row < lastRowNum) {
+                    Row entriesRow = entries.getRow(row);
+                    int iofID = (int) entriesRow.getCell(0).getNumericCellValue();
+                    double balance = 0;
+                    if(iofID != 0) {
+                        String status = entriesRow.getCell(18).getStringCellValue();
+                        String serviceName = entriesRow.getCell(14).getStringCellValue();
+                        int orders = (int) entriesRow.getCell(15).getNumericCellValue();
+                        if("Not paid".equals(status)) {
+                            double amount = entriesRow.getCell(16).getNumericCellValue();
+                            double paid = entriesRow.getCell(19).getNumericCellValue();
+                            balance = paid - amount;
+                        }
+                        if(orders > 0) {
+                            iofIdToServiceToOrder.computeIfAbsent(""+iofID, id -> new HashMap<>())
+                                    .put(serviceName, new ServiceOrder(orders, balance));
+                        }
+                    }
+                    row++;
+                }
+
+                return () -> {
+                    showReport();
+                    notifyErrors();
+                    Notification.show("Loaded entries from Eventor Excel file");
+                };
+            }
+
             try {
                 var xml = unmarshaller.unmarshal(content);
 
@@ -170,7 +218,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
     }
 
     private void addServiceColumns() {
-        if (srl != null) {
+        if (serviceOrdersAvailable()) {
             LinkedHashMap<Integer, Service> idToService = new LinkedHashMap<>();
             List<Service> services = el.getEvent().getService();
             // collect all services...
@@ -178,20 +226,49 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                 idToService.put(Integer.parseInt(s.getId().getValue()), s);
             }
             for (Service s : idToService.values()) {
-                entryGrid.addColumn(pe -> {
-                    Optional<PersonServiceRequest> personServiceRequest = getPersonServiceRequest(pe);
+                if(!iofIdToServiceToOrder.isEmpty()) {
+                    entryGrid.addColumn(pe -> {
+                        Map<String, ServiceOrder> orderMap = iofIdToServiceToOrder.get(pe.getPerson().getId().get(0).getValue());
+                        if(orderMap != null) {
+                            ServiceOrder serviceOrder = orderMap.get(s.getName().get(0).getValue());
+                            if(serviceOrder != null) {
+                                return serviceOrder.amout();
+                            }
+                        }
+                        return "";
+                    }).setHeader(s.getName().get(0).getValue());
+                } else {
+                    entryGrid.addColumn(pe -> {
+                        Optional<PersonServiceRequest> personServiceRequest = getPersonServiceRequest(pe);
 
-                    if (personServiceRequest.isPresent()) {
-                        double counted = personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue()))
-                                .mapToInt(sr -> (int) sr.getRequestedQuantity()).sum();
-                        if(counted == 0) {
+                        if (personServiceRequest.isPresent()) {
+                            double counted = personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue()))
+                                    .mapToInt(sr -> (int) sr.getRequestedQuantity()).sum();
+                            if(counted == 0) {
+                                return "";
+                            }
+                            return counted;
+                        }
+                        return "";
+                    }).setHeader(s.getName().get(0).getValue());
+                }
+            }
+            if(!iofIdToServiceToOrder.isEmpty()) {
+                entryGrid.addColumn(pe -> {
+                    Map<String, ServiceOrder> orderMap = iofIdToServiceToOrder.get(pe.getPerson().getId().get(0).getValue());
+                    if(orderMap != null) {
+                        double sum = orderMap.values().stream().mapToDouble(so -> so.balance()).sum();
+                        if(sum != 0) {
+                            return sum;
+                        } else {
                             return "";
                         }
-                        return counted;
                     }
                     return "";
-                }).setHeader(s.getName().get(0).getValue());
+                }).setHeader("Service balance");
+
             }
+
             this.services.setItems(idToService.values());
         }
     }
@@ -287,7 +364,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
 
             entryGrid.getColumns().forEach(c -> c.setAutoWidth(true));
 
-            if (srl != null) {
+            if (serviceOrdersAvailable()) {
                 addServiceColumns();
             }
             filterReport();
@@ -295,6 +372,10 @@ public class RegistrationVieverView extends AbstractCalculatorView {
 
         }
 
+    }
+
+    private boolean serviceOrdersAvailable() {
+        return srl != null || !iofIdToServiceToOrder.isEmpty();
     }
 
     private void filterReport() {
