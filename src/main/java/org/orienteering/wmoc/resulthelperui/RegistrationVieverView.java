@@ -180,8 +180,10 @@ public class RegistrationVieverView extends AbstractCalculatorView {
             for (Service s : idToService.values()) {
                 entryGrid.addColumn(pe -> {
                     Optional<PersonServiceRequest> personServiceRequest = getPersonServiceRequest(pe);
+
                     if (personServiceRequest.isPresent()) {
-                        long counted = personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue())).count();
+                        double counted = personServiceRequest.get().getServiceRequest().stream().filter(sr -> sr.getService().getId().getValue().equals(s.getId().getValue()))
+                                .mapToInt(sr -> (int) sr.getRequestedQuantity()).sum();
                         if(counted == 0) {
                             return "";
                         }
