@@ -1,6 +1,5 @@
 package org.orienteering.wmoc.services;
 
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.annotation.SessionScope;
 
@@ -12,19 +11,26 @@ import java.util.Map;
 @Component
 public class StartTimeService {
 
+    public record StartInfo(LocalTime time, String clazz) {
+        @Override
+        public String toString() {
+            return clazz + " " + time;
+        }
+    }
+
     public StartTimeService() {
     }
 
-    private Map<Integer, Map<String, LocalTime>> raceToIofIdToStartTime = new HashMap<>();
+    private Map<Integer, Map<String, StartInfo>> raceToIofIdToStartTime = new HashMap<>();
 
-    public void saveStartTime(Integer raceId, String iofId, LocalTime startTime) {
+    public void saveStartTime(Integer raceId, String iofId, LocalTime startTime, String clazz) {
         raceToIofIdToStartTime
                 .computeIfAbsent(raceId, i -> new HashMap<>())
-                .put(iofId, startTime);
+                .put(iofId, new StartInfo(startTime, clazz));
     }
 
-    public LocalTime getStartTime(Integer raceId, String iofId) {
-        Map<String, LocalTime> idToLocalTimeMap = raceToIofIdToStartTime.get(raceId);
+    public StartInfo getStartTime(Integer raceId, String iofId) {
+        Map<String, StartInfo> idToLocalTimeMap = raceToIofIdToStartTime.get(raceId);
         if(idToLocalTimeMap != null) {
             return idToLocalTimeMap.get(iofId);
         }

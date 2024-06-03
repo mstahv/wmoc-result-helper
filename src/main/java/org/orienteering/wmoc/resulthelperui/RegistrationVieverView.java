@@ -18,17 +18,13 @@ import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.data.renderer.Renderer;
 import com.vaadin.flow.function.ValueProvider;
 import com.vaadin.flow.router.Route;
-import com.vaadin.flow.server.VaadinRequest;
-import com.vaadin.flow.spring.annotation.SpringComponent;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
 import jakarta.xml.bind.Unmarshaller;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -58,17 +54,14 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 @Route(layout = TopLayout.class)
@@ -472,7 +465,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                         if (pe.getPerson().getNationality().getValue().contains(f)) {
                             continue;
                         }
-                        String cCard = "";
+                        String cCard = "not known";
                         if (!pe.getControlCard().isEmpty()) {
                             cCard = pe.getControlCard().get(0).getValue();
                         }
@@ -573,15 +566,17 @@ public class RegistrationVieverView extends AbstractCalculatorView {
         XSSFRow header = sheet.createRow(0);
         header.createCell(0).setCellValue("IOF Id");
         header.createCell(1).setCellValue("Bib");
-        header.createCell(2).setCellValue("Start SQ");
-        header.createCell(3).setCellValue("Start FQ");
-        header.createCell(4).setCellValue("Class");
-        header.createCell(5).setCellValue("Name");
-        header.createCell(6).setCellValue("ControlCard");
-        header.createCell(7).setCellValue("Nationality");
-        header.createCell(8).setCellValue("Group");
-        header.createCell(9).setCellValue("Service listing");
-        header.createCell(10).setCellValue("Service balance");
+        header.createCell(2).setCellValue("SQ");
+        header.createCell(3).setCellValue("Start SQ");
+        header.createCell(4).setCellValue("FQ");
+        header.createCell(5).setCellValue("Start FQ");
+        header.createCell(6).setCellValue("Class");
+        header.createCell(7).setCellValue("Name");
+        header.createCell(8).setCellValue("ControlCard");
+        header.createCell(9).setCellValue("Nationality");
+        header.createCell(10).setCellValue("Group");
+        header.createCell(11).setCellValue("Service listing");
+        header.createCell(12).setCellValue("Service balance");
 
         MutableInt idx = new MutableInt(1);
         entryGrid.getGenericDataView().getItems().forEach(
@@ -593,12 +588,14 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                     // Sorry for further maintainers, this section is hardcoded, might not match in the future
                     final int SQ = 1;
                     final int FQ = 3;
-                    LocalTime ss = startTimeService.getStartTime(SQ, iofId);
-                    row.createCell(2).setCellValue(ss == null ? "" : ss.toString());
-                    LocalTime sf = startTimeService.getStartTime(SQ, iofId);
-                    row.createCell(3).setCellValue(sf == null ? "" : sf.toString());
-                    row.createCell(4).setCellValue(pe.getClazz().get(0).getName());
-                    row.createCell(5).setCellValue(pe.getPerson().getName().getGiven() + " " + pe.getPerson().getName().getFamily());
+                    StartTimeService.StartInfo ss = startTimeService.getStartTime(SQ, iofId);
+                    row.createCell(2).setCellValue(ss == null ? "" : ss.clazz());
+                    row.createCell(3).setCellValue(ss == null ? "" : ss.time().toString());
+                    StartTimeService.StartInfo sf = startTimeService.getStartTime(FQ, iofId);
+                    row.createCell(4).setCellValue(sf == null ? "" : sf.clazz());
+                    row.createCell(5).setCellValue(sf == null ? "" : sf.time().toString());
+                    row.createCell(6).setCellValue(pe.getClazz().get(0).getName());
+                    row.createCell(7).setCellValue(pe.getPerson().getName().getGiven() + " " + pe.getPerson().getName().getFamily());
                     String controlCard = "";
                     if (!pe.getControlCard().isEmpty()) {
                         EmitReservation emitReservation = emitReservation(pe);
@@ -609,9 +606,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                             controlCard = "" + parsed;
                         }
                     }
-                    row.createCell(6).setCellValue(controlCard);
-                    row.createCell(7).setCellValue(pe.getPerson().getNationality().getCode());
-                    row.createCell(8).setCellValue(iofIdToTour.getOrDefault(iofId, ""));
+                    row.createCell(8).setCellValue(controlCard);
+                    row.createCell(9).setCellValue(pe.getPerson().getNationality().getCode());
+                    row.createCell(10).setCellValue(iofIdToTour.getOrDefault(iofId, ""));
                     String services = "";
                     Map<String, ServiceOrder> orderMap = iofIdToServiceToOrder.get(pe.getPerson().getId().get(0).getValue());
                     if(orderMap != null) {
@@ -620,7 +617,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                                 .collect(Collectors.joining("\n"));
                         row.setHeightInPoints(orderMap.size()*sheet.getDefaultRowHeightInPoints());
                     }
-                    XSSFCell cell = row.createCell(9);
+                    XSSFCell cell = row.createCell(11);
                     cell.setCellStyle(multiline);
                     cell.setCellValue(services);
                     String balance = "";
@@ -630,12 +627,12 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                             balance = "" + sum + " €";
                         }
                     }
-                    row.createCell(10).setCellValue(balance);
+                    row.createCell(12).setCellValue(balance);
                     idx.inc();
                 }
         );
 
-        for (int i = 0; i < 11; i++) {
+        for (int i = 0; i < 13; i++) {
             sheet.autoSizeColumn(i);
         }
 

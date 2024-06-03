@@ -164,7 +164,7 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                                             .append(";")
                                             .append(c.points())
                                             .append("\n");
-                                    startTimeService.saveStartTime(raceId, c.iofId(), startTime);
+                                    startTimeService.saveStartTime(raceId, c.iofId(), startTime, clazz.getName());
                                     startTime = startTime.plusSeconds(clazz.getStartInterval());
                                 }
                             } else {
