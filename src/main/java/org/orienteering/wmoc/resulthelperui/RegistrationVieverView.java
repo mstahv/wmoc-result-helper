@@ -52,6 +52,7 @@ import org.vaadin.firitin.components.upload.UploadFileHandler;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -193,11 +194,9 @@ public class RegistrationVieverView extends AbstractCalculatorView {
         services.setItemLabelGenerator(s -> s.getName().get(0).getValue());
 
         var excell = new DynamicFileDownloader(out -> gridToXls(out))
-                .withContentTypeGenerator((DynamicFileDownloader.ContentTypeGenerator) () ->
-                        XSSFWorkbookType.XLSX.getContentType())
-                .withFileNameGenerator((DynamicFileDownloader.FileNameGenerator) request -> "bibprinting."+ XSSFWorkbookType.XLSX.getExtension());
+                .withFileNameGenerator((DynamicFileDownloader.FileNameGenerator) request -> "bibprinting.csv");
         excell.asButton().getButton().setIcon(VaadinIcon.DOWNLOAD_ALT.create());
-        excell.getButton().setTooltipText("Excel file for bibs & envelopes, needs all data to succeed!");
+        excell.getButton().setTooltipText("Csv file for bibs & envelopes, needs all data to succeed!");
 
         add(new VHorizontalLayout(
                 uploadFileHandler,
@@ -558,44 +557,62 @@ public class RegistrationVieverView extends AbstractCalculatorView {
 
     }
 
-    private void gridToXls(OutputStream outputStream) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFCellStyle multiline = workbook.createCellStyle();
-        multiline.setWrapText(true);
-        XSSFSheet sheet = workbook.createSheet();
-        XSSFRow header = sheet.createRow(0);
-        header.createCell(0).setCellValue("IOF Id");
-        header.createCell(1).setCellValue("Bib");
-        header.createCell(2).setCellValue("SQ");
-        header.createCell(3).setCellValue("Start SQ");
-        header.createCell(4).setCellValue("FQ");
-        header.createCell(5).setCellValue("Start FQ");
-        header.createCell(6).setCellValue("Class");
-        header.createCell(7).setCellValue("Name");
-        header.createCell(8).setCellValue("ControlCard");
-        header.createCell(9).setCellValue("Nationality");
-        header.createCell(10).setCellValue("Group");
-        header.createCell(11).setCellValue("Service listing");
-        header.createCell(12).setCellValue("Service balance");
+    private static final String DELIM = ";";
 
-        MutableInt idx = new MutableInt(1);
+    private PrintWriter writer;
+
+    private void cell(Object o) {
+        writer.print(o);
+        writer.print(DELIM);
+    }
+
+    private void nl() {
+        writer.println();
+    }
+
+    private void gridToXls(OutputStream outputStream) {
+        final String DELIM = ";";
+        writer = new PrintWriter(outputStream);
+        cell("IOF Id");
+        cell("Bib");
+        cell("SQ");
+        cell("Start SQ");
+        cell("FQ");
+        cell("Start FQ");
+        cell("Class");
+        cell("Sex");
+        cell("Name");
+        cell("ControlCard");
+        cell("Nationality");
+        cell("Group");
+        cell("Service balance");
+        cell("Service1");
+        cell("Service2");
+        cell("Service3");
+        cell("Service4");
+        cell("Service5");
+        cell("Service6");
+        cell("Service7");
+        cell("Service8");
+        nl();
+
         entryGrid.getGenericDataView().getItems().forEach(
                 pe -> {
-                    XSSFRow row = sheet.createRow(idx.intValue());
                     String iofId = pe.getPerson().getId().get(0).getValue();
-                    row.createCell(0).setCellValue(iofId);
-                    row.createCell(1).setCellValue(pe.getId().getValue());
+                    cell(iofId);
+                    cell(pe.getId().getValue());
                     // Sorry for further maintainers, this section is hardcoded, might not match in the future
                     final int SQ = 1;
                     final int FQ = 3;
                     StartTimeService.StartInfo ss = startTimeService.getStartTime(SQ, iofId);
-                    row.createCell(2).setCellValue(ss == null ? "" : ss.clazz());
-                    row.createCell(3).setCellValue(ss == null ? "" : ss.time().toString());
+                    cell(ss == null ? "" : ss.clazz());
+                    cell(ss == null ? "" : ss.time().toString());
                     StartTimeService.StartInfo sf = startTimeService.getStartTime(FQ, iofId);
-                    row.createCell(4).setCellValue(sf == null ? "" : sf.clazz());
-                    row.createCell(5).setCellValue(sf == null ? "" : sf.time().toString());
-                    row.createCell(6).setCellValue(pe.getClazz().get(0).getName());
-                    row.createCell(7).setCellValue(pe.getPerson().getName().getGiven() + " " + pe.getPerson().getName().getFamily());
+                    cell(sf == null ? "" : sf.clazz());
+                    cell(sf == null ? "" : sf.time().toString());
+                    cell(pe.getClazz().get(0).getName());
+                    cell("M".equals(pe.getPerson().getSex()) ? "sininen.pdf" : "pinkki.pdf");
+                    cell(pe.getPerson().getName().getGiven() + " " + pe.getPerson().getName().getFamily());
                     String controlCard = "";
                     if (!pe.getControlCard().isEmpty()) {
                         EmitReservation emitReservation = emitReservation(pe);
@@ -606,20 +623,10 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                             controlCard = "" + parsed;
                         }
                     }
-                    row.createCell(8).setCellValue(controlCard);
-                    row.createCell(9).setCellValue(pe.getPerson().getNationality().getCode());
-                    row.createCell(10).setCellValue(iofIdToTour.getOrDefault(iofId, ""));
-                    String services = "";
+                    cell(controlCard);
+                    cell(pe.getPerson().getNationality().getCode());
+                    cell(iofIdToTour.getOrDefault(iofId, ""));
                     Map<String, ServiceOrder> orderMap = iofIdToServiceToOrder.get(pe.getPerson().getId().get(0).getValue());
-                    if(orderMap != null) {
-                        services = orderMap.entrySet().stream()
-                                .map(e -> e.getValue().amout() + " " + e.getKey())
-                                .collect(Collectors.joining("\n"));
-                        row.setHeightInPoints(orderMap.size()*sheet.getDefaultRowHeightInPoints());
-                    }
-                    XSSFCell cell = row.createCell(11);
-                    cell.setCellStyle(multiline);
-                    cell.setCellValue(services);
                     String balance = "";
                     if(orderMap != null) {
                         double sum = orderMap.values().stream().mapToDouble(so -> so.balance()).sum();
@@ -627,22 +634,17 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                             balance = "" + sum + " €";
                         }
                     }
-                    row.createCell(12).setCellValue(balance);
-                    idx.inc();
+                    cell(balance);
+
+                    if(orderMap != null) {
+                        orderMap.forEach((s, serviceOrder) -> {
+                            cell(serviceOrder.amout() + " " + s);
+                        });
+                    }
+                    nl();
                 }
         );
-
-        for (int i = 0; i < 13; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        try {
-            workbook.write(outputStream);
-            outputStream.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
+        writer.close();
     }
 
     enum EmitReservation {
