@@ -4,6 +4,7 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H3;
 import com.vaadin.flow.component.html.Pre;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.textfield.IntegerField;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
@@ -17,6 +18,8 @@ import org.orienteering.wmoc.resulthelperui.planner.PlanSelect;
 import org.orienteering.wmoc.services.RankingPointsService;
 import org.orienteering.wmoc.services.StartTimeService;
 import org.vaadin.firitin.components.DynamicFileDownloader;
+import org.vaadin.firitin.components.orderedlayout.VHorizontalLayout;
+import org.vaadin.firitin.components.textfield.VIntegerField;
 import org.vaadin.firitin.components.upload.UploadFileHandler;
 
 import java.io.IOException;
@@ -42,11 +45,13 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
     Integer raceId;
     private EntryList entryList;
     private ArrayList<Iof3ResultList> previousYearResults = new ArrayList<>();
+    private IntegerField slotsBetweenClasses = new VIntegerField("Free slots between classes")
+            .withValue(3);
 
     public QualificationRankingPointsView(PlanSelect planSelect, StartTimeService startTimeService) {
         add("This view calculates ranking points from n last year results, and generates even qualification heats based on them and countries.");
 
-        add(planSelect);
+        add(new VHorizontalLayout(planSelect, slotsBetweenClasses).withAlignItems(Alignment.BASELINE));
 
         JAXBContext jaxbContext = null;
         try {
@@ -170,6 +175,8 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                             } else {
                                 collectPossibleError("No sign ups for planned class" + clazz.getName());
                             }
+
+                            startTime = startTime.plusSeconds(clazz.getStartInterval() * slotsBetweenClasses.getValue());
 
                             clazz = clazz.getNextClazz();
                         }
