@@ -224,15 +224,17 @@ public class RegistrationVieverView extends AbstractCalculatorView {
             try {
                 marshaller.marshal(personEntry, stringWriter);
 
-                srl.getPersonServiceRequest().stream()
-                        .filter(psr -> psr.getPerson().idEquals(personEntry.getPerson()))
-                        .forEach(psr -> {
-                            try {
-                                marshaller.marshal(psr, stringWriter);
-                            } catch (JAXBException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
+                if(srl != null) {
+                    srl.getPersonServiceRequest().stream()
+                            .filter(psr -> psr.getPerson().idEquals(personEntry.getPerson()))
+                            .forEach(psr -> {
+                                try {
+                                    marshaller.marshal(psr, stringWriter);
+                                } catch (JAXBException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            });
+                }
 
             } catch (JAXBException ex) {
                 throw new RuntimeException(ex);
@@ -606,7 +608,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                     final int FQ = 3;
                     StartTimeService.StartInfo ss = startTimeService.getStartTime(SQ, iofId);
                     cell(ss == null ? "" : ss.clazz());
-                    cell(ss == null ? "" : ss.time().toString());
+                    cell(ss == null ? "" : ss.time().toString() + ", " + ss.start());
                     StartTimeService.StartInfo sf = startTimeService.getStartTime(FQ, iofId);
                     cell(sf == null ? "" : sf.clazz());
                     cell(sf == null ? "" : sf.time().toString());

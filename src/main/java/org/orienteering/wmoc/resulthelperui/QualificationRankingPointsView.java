@@ -137,6 +137,8 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                 sb.append("Emit");
                 sb.append(";");
                 sb.append("Points");
+                sb.append(";");
+                sb.append("Start");
                 sb.append(";\n");
                 List<Start> starts = plan.getStarts();
                 for (Start s : starts) {
@@ -168,8 +170,10 @@ public class QualificationRankingPointsView extends AbstractCalculatorView {
                                             .append(c.emit())
                                             .append(";")
                                             .append(c.points())
+                                            .append(";")
+                                            .append(clazz.getStart().getName())
                                             .append("\n");
-                                    startTimeService.saveStartTime(raceId, c.iofId(), startTime, clazz.getName());
+                                    startTimeService.saveStartTime(raceId, c.iofId(), startTime, clazz.getName(), clazz.getStart().getName());
                                     startTime = startTime.plusSeconds(clazz.getStartInterval());
                                 }
                             } else {

@@ -158,7 +158,7 @@ public class ClazzCard extends Div {
                     lastStart = lastStart.plusSeconds(current.getEstimatedRunners() * current.getStartInterval());
                 }
             }
-            lastStartParagraph.setText("Last in of queue: " + lastStart);
+            lastStartParagraph.setText("First free slot after the queue: " + lastStart);
         } else {
             // force re-reading the calculated firstStartTime
             binder.refreshFields();

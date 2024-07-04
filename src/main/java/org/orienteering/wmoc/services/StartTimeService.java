@@ -11,10 +11,10 @@ import java.util.Map;
 @Component
 public class StartTimeService {
 
-    public record StartInfo(LocalTime time, String clazz) {
+    public record StartInfo(LocalTime time, String clazz, String start) {
         @Override
         public String toString() {
-            return clazz + " " + time;
+            return clazz + " " + time + " " + start;
         }
     }
 
@@ -23,10 +23,10 @@ public class StartTimeService {
 
     private Map<Integer, Map<String, StartInfo>> raceToIofIdToStartTime = new HashMap<>();
 
-    public void saveStartTime(Integer raceId, String iofId, LocalTime startTime, String clazz) {
+    public void saveStartTime(Integer raceId, String iofId, LocalTime startTime, String clazz, String start) {
         raceToIofIdToStartTime
                 .computeIfAbsent(raceId, i -> new HashMap<>())
-                .put(iofId, new StartInfo(startTime, clazz));
+                .put(iofId, new StartInfo(startTime, clazz, start));
     }
 
     public StartInfo getStartTime(Integer raceId, String iofId) {

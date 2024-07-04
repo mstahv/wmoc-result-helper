@@ -89,10 +89,10 @@ public class RankingPointsService {
             }
             // distribute runners to heats with "ABBA" principle
             for(int i = 0 ; i < competitors.size(); i++) {
-                boolean raising = (i % (numHeats*2) ) % 2 == 0;
+                boolean raising = (i /numHeats) % 2 == 0;
                 int heatIndex = i % numHeats;
                 if(!raising) {
-                    heatIndex = (numHeats - heatIndex)%numHeats;
+                    heatIndex = -heatIndex + numHeats -1;
                 }
                 heats.get(heatIndex).add(competitors.get(i));
             }
