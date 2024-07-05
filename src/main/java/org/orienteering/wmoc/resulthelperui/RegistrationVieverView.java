@@ -611,7 +611,7 @@ public class RegistrationVieverView extends AbstractCalculatorView {
                     cell(ss == null ? "" : ss.time().toString() + ", " + ss.start());
                     StartTimeService.StartInfo sf = startTimeService.getStartTime(FQ, iofId);
                     cell(sf == null ? "" : sf.clazz());
-                    cell(sf == null ? "" : sf.time().toString());
+                    cell(sf == null ? "" : sf.time().toString() + ", " + sf.start());
                     cell(pe.getClazz().get(0).getName());
                     cell("M".equals(pe.getPerson().getSex()) ? "sininen.pdf" : "pinkki.pdf");
                     cell(pe.getPerson().getName().getGiven() + " " + pe.getPerson().getName().getFamily());
