@@ -3,18 +3,20 @@ package org.orienteering.wmoc.resulthelperui.planner;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.page.WebStorage;
 import com.vaadin.flow.spring.annotation.UIScope;
-import com.vaadin.flow.spring.annotation.VaadinSessionScope;
 import org.eclipse.serializer.Serializer;
 import org.eclipse.serializer.SerializerFoundation;
-import org.eclipse.serializer.persistence.types.PersistenceLegacyTypeMappingResultor;
 import org.orienteering.wmoc.domain.planner.AllPlans;
 import org.orienteering.wmoc.domain.planner.Clazz;
 import org.orienteering.wmoc.domain.planner.Start;
 import org.orienteering.wmoc.domain.planner.StartTimePlan;
 import org.springframework.stereotype.Component;
 
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintStream;
 import java.time.LocalDateTime;
 import java.util.Base64;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -98,5 +100,44 @@ public class PlannerService {
         if(allPlans != null) {
             allPlans.getPlans().remove(startTimePlan);
         }
+    }
+
+    public void toCsv(StartTimePlan plan, OutputStream outputStream) {
+        var writer = new PrintStream(outputStream);
+        writer.print("Start");
+        writer.print(DELIM);
+        writer.print("Class");
+        writer.print(DELIM);
+        writer.print("First start");
+        writer.print(DELIM);
+        writer.print("Interval");
+        writer.print(DELIM);
+        writer.print("EstimatedRunners");
+        writer.println(DELIM);
+        List<Start> starts = plan.getStarts();
+        for(Start s : starts) {
+            for(Clazz c : s.getStartQueues()) {
+                printCsvLine(s, c, writer);
+                while(c.getNextClazz() != null) {
+                    c = c.getNextClazz();
+                    printCsvLine(s, c, writer);
+                }
+            }
+        }
+    }
+
+    private static final String DELIM = ";";
+
+    private void printCsvLine(Start s, Clazz c, PrintStream writer) {
+        writer.print(s.getName());
+        writer.print(DELIM);
+        writer.print(c.getName());
+        writer.print(DELIM);
+        writer.print(c.getFirstStart());
+        writer.print(DELIM);
+        writer.print(c.getStartInterval());
+        writer.print(DELIM);
+        writer.print(c.getEstimatedRunners());
+        writer.println(DELIM);
     }
 }

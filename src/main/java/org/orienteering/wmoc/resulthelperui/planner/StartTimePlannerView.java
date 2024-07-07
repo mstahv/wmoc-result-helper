@@ -95,7 +95,13 @@ public class StartTimePlannerView extends VerticalLayout {
                                 throw new RuntimeException(e);
                             }
                 });
-                
+                DynamicFileDownloader downloadCsv = new DynamicFileDownloader(
+                        new VButton(VaadinIcon.GRID.create())
+                                .withTooltip("Downloads a CSV file of the selected plan"),
+                        "plan.csv", outputStream -> {
+                        plannerService.toCsv(plans.getValue(), outputStream);
+                });
+
                 UploadFileHandler ufh = new UploadFileHandler((is, md) -> {
                     try {
                        var plan = plannerService.readBackup(is.readAllBytes());
@@ -112,7 +118,7 @@ public class StartTimePlannerView extends VerticalLayout {
 
                 planSelector = new VHorizontalLayout()
                         .space()
-                        .withComponents(plans, addPlan, save, backupDownload, ufh)
+                        .withComponents(plans, addPlan, save, backupDownload, downloadCsv, ufh)
                         .withPadding(Padding.Side.RIGHT)
                         .alignAll(Alignment.CENTER);
                 findAncestor(TopLayout.class).addToNavbar(planSelector);
