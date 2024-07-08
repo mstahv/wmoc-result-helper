@@ -115,10 +115,23 @@ public class StartTimePlannerView extends VerticalLayout {
                 }).withDragAndDrop(false)
                         .withUploadButton(new VButton(VaadinIcon.UPLOAD.create())
                         .withTooltip("Upload plan file (.dat)"));
+                UploadFileHandler uploadCsv = new UploadFileHandler((is, md) -> {
+                    try {
+                        var plan = plannerService.readCsv(is, md.fileName());
+                        return () -> {
+                            plans.getGenericDataView().refreshAll();
+                            plans.setValue(plan);
+                        };
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                }).withDragAndDrop(false)
+                        .withUploadButton(new VButton(VaadinIcon.UPLOAD.create())
+                                .withTooltip("Upload plan as CSV (check format from download)"));
 
                 planSelector = new VHorizontalLayout()
                         .space()
-                        .withComponents(plans, addPlan, save, backupDownload, downloadCsv, ufh)
+                        .withComponents(plans, addPlan, save, backupDownload, downloadCsv, ufh, uploadCsv)
                         .withPadding(Padding.Side.RIGHT)
                         .alignAll(Alignment.CENTER);
                 findAncestor(TopLayout.class).addToNavbar(planSelector);

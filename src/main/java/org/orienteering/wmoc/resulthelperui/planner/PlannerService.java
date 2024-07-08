@@ -11,12 +11,21 @@ import org.orienteering.wmoc.domain.planner.Start;
 import org.orienteering.wmoc.domain.planner.StartTimePlan;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 import java.io.PrintStream;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -128,16 +137,62 @@ public class PlannerService {
 
     private static final String DELIM = ";";
 
+    // LocalDate formatter for format like 13:33:00
+    private static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("HH:mm:ss");
+
+
     private void printCsvLine(Start s, Clazz c, PrintStream writer) {
         writer.print(s.getName());
         writer.print(DELIM);
         writer.print(c.getName());
         writer.print(DELIM);
-        writer.print(c.getFirstStart());
+        writer.print(c.getFirstStart().format(HHmmss));
         writer.print(DELIM);
         writer.print(c.getStartInterval());
         writer.print(DELIM);
         writer.print(c.getEstimatedRunners());
         writer.println(DELIM);
+    }
+
+    public StartTimePlan readCsv(InputStream is, String filename) throws IOException {
+        var reader = new BufferedReader(new InputStreamReader(is));
+        reader.readLine(); // skip header
+        StartTimePlan plan = new StartTimePlan();
+        plan.setPlanName(filename);
+        Map<String,Start> nameToStart = new HashMap<>();
+
+        String line = reader.readLine();
+        while(line != null) {
+            if(line.isBlank()) {
+                line = reader.readLine();
+                continue;
+            }
+            // Start 1;M35;11:00;60;80;
+            String[] parts = line.split(";");
+            String startName = parts[0];
+            Start start = nameToStart.computeIfAbsent(startName, k -> {
+                Start s = new Start(startName);
+                plan.getStarts().add(s);
+                return s;
+            });
+            Clazz clazz = new Clazz(parts[1], start);
+            clazz.setFirstStart(LocalTime.parse(parts[2], HHmmss));
+            clazz.setStartInterval(Integer.parseInt(parts[3]));
+            clazz.setEstimatedRunners(Integer.parseInt(parts[4]));
+            start.getStartQueues().add(clazz);
+
+            line = reader.readLine();
+        }
+        Collections.sort(plan.getStarts(), Comparator.comparing(Start::getName));
+
+        // given special name if similarly named already exists
+        allPlans.getPlans().stream().filter(p -> p.getPlanName().equals(plan.getPlanName()))
+                .findFirst().ifPresent(p -> {
+                    plan.setPlanName(plan.getPlanName() + ", uploaded " + LocalDateTime.now());
+                });
+        allPlans.getPlans().add(plan);
+
+        return plan;
+
     }
 }
