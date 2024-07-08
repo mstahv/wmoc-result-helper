@@ -138,8 +138,7 @@ public class PlannerService {
     private static final String DELIM = ";";
 
     // LocalDate formatter for format like 13:33:00
-    private static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("HH:mm:ss");
-
+    private static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("H:mm:ss");
 
     private void printCsvLine(Start s, Clazz c, PrintStream writer) {
         writer.print(s.getName());

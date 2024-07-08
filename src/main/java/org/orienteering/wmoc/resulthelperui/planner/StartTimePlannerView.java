@@ -122,8 +122,10 @@ public class StartTimePlannerView extends VerticalLayout {
                             plans.getGenericDataView().refreshAll();
                             plans.setValue(plan);
                         };
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex);
+                    } catch (Exception ex) {
+                        return () -> {
+                            Notification.show("Error reading CSV: " + ex.getMessage());
+                        };
                     }
                 }).withDragAndDrop(false)
                         .withUploadButton(new VButton(VaadinIcon.UPLOAD.create())
