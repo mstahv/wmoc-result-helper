@@ -87,14 +87,21 @@ public class RankingPointsService {
             for(int i = 0; i < numHeats; i++) {
                 heats.add(new ArrayList<>());
             }
-            // distribute runners to heats with "ABBA" principle
+            boolean raising = true;
+            // distribute ranked runners to heats with "ABBA" principle
+            // then continue with ABAB or BABA whichever direction was last in use
             for(int i = 0 ; i < competitors.size(); i++) {
-                boolean raising = (i /numHeats) % 2 == 0;
-                int heatIndex = i % numHeats;
+                QualificationCompetitor competitor = competitors.get(i);
+                int heatIndex;
+                heatIndex = i % numHeats;
+                // ABBA direction changes only if still withing ranked runners
+                if(competitor.points() > 0 ) {
+                    raising = (i /numHeats) % 2 == 0;
+                }
                 if(!raising) {
                     heatIndex = -heatIndex + numHeats -1;
                 }
-                heats.get(heatIndex).add(competitors.get(i));
+                heats.get(heatIndex).add(competitor);
             }
             for (int i = 0; i < heats.size(); i++) {
                 List<QualificationCompetitor> competitorList = heats.get(i);
