@@ -172,7 +172,7 @@ public class NormalFinalService {
                 }
                 b.add(new FinalRunner(
                         r.getPerson().getId().get(0).getValue(),
-                        r.getEntryId().getValue(),
+                        r.getResult().get(0).getBibNumber(),
                         r.getPerson().getName().getGiven(),
                         r.getPerson().getName().getFamily(),
                         r.getPerson().getNationality().getCode(),
@@ -197,7 +197,7 @@ public class NormalFinalService {
                     if(position.intValue() == pos) {
                         a.add(new FinalRunner(
                                 pr.getPerson().getId().get(0).getValue(),
-                                pr.getEntryId().getValue(),
+                                pr.getResult().get(0).getBibNumber(),
                                 pr.getPerson().getName().getGiven(),
                                 pr.getPerson().getName().getFamily(),
                                 pr.getPerson().getNationality().getCode(),
