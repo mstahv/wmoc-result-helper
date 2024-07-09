@@ -42,14 +42,4 @@ public class NormalFinalStartListCompositionTest {
 
     }
 
-    private void csvPrint(List<FinalRunner> a) {
-        var o = System.out;
-        for (FinalRunner r : a) {
-            o.print(r.iofId());
-            o.print(";");
-            o.print(r.name());
-            o.print(";");
-            o.println(r.qualClazz());
-        }
-    }
 }

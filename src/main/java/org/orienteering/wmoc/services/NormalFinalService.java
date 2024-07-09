@@ -172,9 +172,11 @@ public class NormalFinalService {
                 }
                 b.add(new FinalRunner(
                         r.getPerson().getId().get(0).getValue(),
-                        r.getPerson().getName().getGiven() + " " + r.getPerson().getName().getFamily(),
+                        r.getEntryId().getValue(),
                         r.getPerson().getName().getGiven(),
                         r.getPerson().getName().getFamily(),
+                        r.getPerson().getNationality().getCode(),
+                        r.getOrganisation().getName(),
                         (classResult.getClazz().getShortName() == null ? classResult.getClazz().getName(): classResult.getClazz().getShortName() ) + "/" + r.getResult().get(0).getStatus().value()
                 ));
             }
@@ -195,9 +197,11 @@ public class NormalFinalService {
                     if(position.intValue() == pos) {
                         a.add(new FinalRunner(
                                 pr.getPerson().getId().get(0).getValue(),
-                                pr.getPerson().getName().getGiven() + " " + pr.getPerson().getName().getFamily(),
+                                pr.getEntryId().getValue(),
                                 pr.getPerson().getName().getGiven(),
                                 pr.getPerson().getName().getFamily(),
+                                pr.getPerson().getNationality().getCode(),
+                                pr.getOrganisation().getName(),
                                 (rl.getClazz().getShortName() == null ? rl.getClazz().getName(): rl.getClazz().getShortName() ) + "/" + position.intValue()
                         ));
                         iterator.remove();

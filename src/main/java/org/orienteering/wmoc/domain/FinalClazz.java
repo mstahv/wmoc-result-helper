@@ -14,7 +14,15 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
         out.print(DELIM);
         out.print("IOF ID");
         out.print(DELIM);
-        out.print("Name");
+        out.print("BIB");
+        out.print(DELIM);
+        out.print("Given");
+        out.print(DELIM);
+        out.print("Family");
+        out.print(DELIM);
+        out.print("Nationality");
+        out.print(DELIM);
+        out.print("Organization");
         out.print(DELIM);
         out.print("Class/pos in qualification");
         out.println(DELIM);
@@ -29,13 +37,17 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
             out.print(DELIM);
             out.print(r.iofId());
             out.print(DELIM);
-            out.print(r.name());
+            out.print(r.bib());
             out.print(DELIM);
             out.print(r.given());
             out.print(DELIM);
             out.print(r.family());
             out.print(DELIM);
             out.print(r.qualClazz());
+            out.println(DELIM);
+            out.print(r.nationality());
+            out.println(DELIM);
+            out.print(r.club());
             out.println(DELIM);
             ns = ns.plusSeconds(startInterval);
         }
