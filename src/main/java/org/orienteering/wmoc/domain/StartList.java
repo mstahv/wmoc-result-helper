@@ -28,7 +28,11 @@ public class StartList {
 
     public void initFromPersonResults(List<Iof3PersonResult> personResult) {
         personResult.forEach(pr -> {
-            normalStartGroup.add(new FinalCompetitor(pr.getPerson(), pr.getResult().get(0).getPosition(), pr.getResult().get(0).getTime(), clazzQualifier));
+            normalStartGroup.add(new FinalCompetitor(pr.getPerson(), pr.getResult().get(0).getBibNumber(),
+                    // WMOC 2024 speciality, nationality from org
+                    pr.getOrganisation().getCountry().getCode(),
+                    pr.getOrganisation().getName(),
+                    pr.getResult().get(0).getPosition(), pr.getResult().get(0).getTime(), clazzQualifier));
         });
     }
 

@@ -6,14 +6,20 @@ import java.math.BigInteger;
 
 public class FinalCompetitor {
     private final Person person;
+    private final String bib;
+    private final String nationality;
+    private final String organization;
     private int position = Integer.MAX_VALUE;
     private int time = Integer.MAX_VALUE;
     private String reason;
 
     private ClazzQualifier middleFinalClass;
 
-    public FinalCompetitor(Person person, Integer position, Double time, ClazzQualifier middleFinalClass) {
+    public FinalCompetitor(Person person, String bib, String nationality, String organization, Integer position, Double time, ClazzQualifier middleFinalClass) {
         this.person = person;
+        this.bib = bib;
+        this.nationality = nationality;
+        this.organization = organization;
         if(time != null) {
             this.time = (int) (time.doubleValue()*100); // 100ths of a second
         }
@@ -47,5 +53,17 @@ public class FinalCompetitor {
 
     public ClazzQualifier getMiddleFinalClass() {
         return middleFinalClass;
+    }
+
+    public String getBib() {
+        return bib;
+    }
+
+    public String getNationality() {
+        return nationality;
+    }
+
+    public String getOrganization() {
+        return organization;
     }
 }
