@@ -172,7 +172,7 @@ public class ClassSplitterService {
         ageClasses.forEach(ageClass -> {
             ageClass.getStartLists().forEach((clazzQualifier, startList) -> {
                 List<StarterDetails> starters = new ArrayList<>();
-                classNameToStarters.put(ageClass.getName() + "-" + clazzQualifier, starters);
+                classNameToStarters.put(ageClass.getName() + "" + clazzQualifier, starters);
                 // first the extra starters, e.g. top from qualification, but mp in middle
                 sortStartGroup(startList.getExtraStarters());
                 startList.getExtraStarters().forEach(fc -> {
@@ -259,7 +259,7 @@ public class ClassSplitterService {
     }
 
     private static void printCompetitor(StringBuilder sb, AgeClass ageClass, ClazzQualifier clazzQualifier, FinalCompetitor fc, String comment) {
-        sb.append(ageClass.getName() + "-" + clazzQualifier);
+        sb.append(ageClass.getName() + "" + clazzQualifier);
         sb.append(";");
         sb.append(fc.getPerson().getName().getGiven() + " " + fc.getPerson().getName().getFamily());
         sb.append(";");
