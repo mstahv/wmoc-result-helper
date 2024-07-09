@@ -159,6 +159,8 @@ public class NormalFinalService {
                 b.add(new FinalRunner(
                         r.getPerson().getId().get(0).getValue(),
                         r.getPerson().getName().getGiven() + " " + r.getPerson().getName().getFamily(),
+                        r.getPerson().getName().getGiven(),
+                        r.getPerson().getName().getFamily(),
                         classResult.getClazz().getShortName() + "/" + r.getResult().get(0).getStatus().value()
                 ));
             }
@@ -180,6 +182,8 @@ public class NormalFinalService {
                         a.add(new FinalRunner(
                                 pr.getPerson().getId().get(0).getValue(),
                                 pr.getPerson().getName().getGiven() + " " + pr.getPerson().getName().getFamily(),
+                                pr.getPerson().getName().getGiven(),
+                                pr.getPerson().getName().getFamily(),
                                 rl.getClazz().getShortName() + "/" + position.intValue()
                         ));
                         iterator.remove();

@@ -31,6 +31,10 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
             out.print(DELIM);
             out.print(r.name());
             out.print(DELIM);
+            out.print(r.given());
+            out.print(DELIM);
+            out.print(r.family());
+            out.print(DELIM);
             out.print(r.qualClazz());
             out.println(DELIM);
             ns = ns.plusSeconds(startInterval);
