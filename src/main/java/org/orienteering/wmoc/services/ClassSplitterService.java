@@ -17,6 +17,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.RecordComponent;
 import java.time.Duration;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -69,6 +70,8 @@ public class ClassSplitterService {
         clazzAmountToPromotionRules.put(5, rules);
 
     }
+
+    private static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("H:mm:ss");
 
     public static String splitToFinals(Iof3ResultList qual, Iof3ResultList middleResults, StartTimePlan plan, List<String> errors) {
 
@@ -329,8 +332,8 @@ public class ClassSplitterService {
         public static StarterDetails of(FinalCompetitor fc, String reason) {
             String time = "";
             if(fc.getTime() != Integer.MAX_VALUE) {
-                Duration duration = Duration.ofSeconds(fc.getTime());
-                time = duration.toHoursPart() + ":" + duration.toMinutesPart();
+                int s = fc.getTime()/100;
+                time = String.format("%d:%02d:%02d", s / 3600, (s % 3600) / 60, (s % 60));
             }
             String pos = "";
             if(fc.getPosition() != Integer.MAX_VALUE) {
@@ -360,10 +363,12 @@ public class ClassSplitterService {
             }
             sb.append(";\n");            }
 
+        private final static DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("H:mm:ss");
+
         public void printCsv(String className, LocalTime startTime, StringBuilder sb) {
             sb.append(className);
             sb.append(";");
-            sb.append(startTime);
+            sb.append(startTime.format(HHmmss));
             sb.append(";");
             RecordComponent[] recordComponents = StarterDetails.class.getRecordComponents();
             for (RecordComponent rc : recordComponents) {
