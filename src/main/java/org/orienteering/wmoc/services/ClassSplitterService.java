@@ -315,6 +315,8 @@ public class ClassSplitterService {
     record StarterDetails(
             String iofId,
             String name,
+            String given,
+            String family,
             String comment,
 
             String middleClazz,
@@ -335,6 +337,8 @@ public class ClassSplitterService {
             return new StarterDetails(
                     fc.getPerson().getId().get(0).getValue(),
                     fc.getPerson().getName().getGiven() + " " + fc.getPerson().getName().getFamily(),
+                    fc.getPerson().getName().getGiven(),
+                    fc.getPerson().getName().getFamily(),
                     reason,
                     fc.getMiddleFinalClass().name(),
                     pos,

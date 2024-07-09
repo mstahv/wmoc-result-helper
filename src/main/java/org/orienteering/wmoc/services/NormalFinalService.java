@@ -20,7 +20,11 @@ public class NormalFinalService {
     public static List<FinalClazz> getFinalClazzes(Iof3ResultList qualificationResults) {
         Map<String, List<Iof3ClassResult>> mainClassToClassResult = new TreeMap<>();
         qualificationResults.getClassResult().forEach(r -> {
-            String mainClass = r.getClazz().getShortName().substring(0, r.getClazz().getShortName().indexOf("-"));
+            String className = r.getClazz().getShortName();
+            if(className == null) {
+                className = r.getClazz().getName();
+            }
+            String mainClass = className.substring(0, className.indexOf("-"));
             mainClassToClassResult.computeIfAbsent(mainClass, s -> new ArrayList<>()).add(r);
         });
 
@@ -30,8 +34,18 @@ public class NormalFinalService {
             String mainClass = entry.getKey();
             List<Iof3ClassResult> resultLists = entry.getValue();
             // sort by desc qualification by class name, first from last heat is the last starter
-            Collections.sort(resultLists, (o1, o2) ->
-                    o2.getClazz().getShortName().compareTo(o1.getClazz().getShortName()));
+            Collections.sort(resultLists, (o1, o2) -> {
+                String o1name;
+                String o2name;
+                if(o1.getClazz().getShortName() == null) {
+                    o1name = o1.getClazz().getName();
+                    o2name = o2.getClazz().getName();
+                } else {
+                    o1name = o1.getClazz().getShortName();
+                    o2name = o2.getClazz().getShortName();
+                }
+                return o2name.compareTo(o1name);
+            });
 
             int numberOfRunners = resultLists.stream()
                     .mapToInt(rl -> rl.getPersonResult().size())
@@ -161,7 +175,7 @@ public class NormalFinalService {
                         r.getPerson().getName().getGiven() + " " + r.getPerson().getName().getFamily(),
                         r.getPerson().getName().getGiven(),
                         r.getPerson().getName().getFamily(),
-                        classResult.getClazz().getShortName() + "/" + r.getResult().get(0).getStatus().value()
+                        (classResult.getClazz().getShortName() == null ? classResult.getClazz().getName(): classResult.getClazz().getShortName() ) + "/" + r.getResult().get(0).getStatus().value()
                 ));
             }
         }
@@ -184,7 +198,7 @@ public class NormalFinalService {
                                 pr.getPerson().getName().getGiven() + " " + pr.getPerson().getName().getFamily(),
                                 pr.getPerson().getName().getGiven(),
                                 pr.getPerson().getName().getFamily(),
-                                rl.getClazz().getShortName() + "/" + position.intValue()
+                                (rl.getClazz().getShortName() == null ? rl.getClazz().getName(): rl.getClazz().getShortName() ) + "/" + position.intValue()
                         ));
                         iterator.remove();
                     } else {
