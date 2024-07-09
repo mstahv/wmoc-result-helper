@@ -2,6 +2,7 @@ package org.orienteering.wmoc.domain;
 
 import java.io.PrintStream;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public record FinalClazz(String clazzName, List<FinalRunner> runners) {
@@ -28,12 +29,15 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
         out.println(DELIM);
     }
 
+    // LocalDate formatter for format like 13:33:00
+    private static final DateTimeFormatter HHmmss = DateTimeFormatter.ofPattern("H:mm:ss");
+
     public LocalTime printCsv(PrintStream out, LocalTime ns, int startInterval) {
 
         for (FinalRunner r : runners) {
             out.print(clazzName);
             out.print(DELIM);
-            out.print(ns);
+            out.print(ns.format(HHmmss));
             out.print(DELIM);
             out.print(r.iofId());
             out.print(DELIM);
@@ -43,11 +47,11 @@ public record FinalClazz(String clazzName, List<FinalRunner> runners) {
             out.print(DELIM);
             out.print(r.family());
             out.print(DELIM);
-            out.print(r.qualClazz());
-            out.println(DELIM);
             out.print(r.nationality());
-            out.println(DELIM);
+            out.print(DELIM);
             out.print(r.club());
+            out.print(DELIM);
+            out.print(r.qualClazz());
             out.println(DELIM);
             ns = ns.plusSeconds(startInterval);
         }
