@@ -27,11 +27,13 @@ import org.vaadin.firitin.components.timepicker.VTimePicker;
 
 import java.time.LocalTime;
 import java.util.Arrays;
+import java.util.Locale;
 
 public class ClazzCard extends Div {
     private final Clazz c;
     private TimePicker firstStart = new VTimePicker()
-            .withWidth("5.5em");
+            .withWidth("5.5em")
+            .withLocale(Locale.UK);
     private VTextField name = new VTextField().withWidth("5em");
     private IntegerField startInterval = new VIntegerField()
             .withLabel("Start interval")
