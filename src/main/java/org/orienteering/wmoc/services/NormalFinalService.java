@@ -176,7 +176,7 @@ public class NormalFinalService {
                         r.getPerson().getName().getGiven(),
                         r.getPerson().getName().getFamily(),
                         // TODO hard coding this now to WMOC 2024 data, this is technically bit wrong
-                        r.getOrganisation().getCountry().getCode(),
+                        r.getPerson().getNationality().getCode(),
                         r.getOrganisation().getName(),
                         (classResult.getClazz().getShortName() == null ? classResult.getClazz().getName(): classResult.getClazz().getShortName() ) + "/" + r.getResult().get(0).getStatus().value()
                 ));
@@ -201,8 +201,7 @@ public class NormalFinalService {
                                 pr.getResult().get(0).getBibNumber(),
                                 pr.getPerson().getName().getGiven(),
                                 pr.getPerson().getName().getFamily(),
-                                // TODO hard coding this now to WMOC 2024 data, this is technically bit wrong
-                                pr.getOrganisation().getCountry().getCode(),
+                                pr.getPerson().getNationality().getCode(),
                                 //pr.getPerson().getNationality().getCode(),
                                 pr.getOrganisation().getName(),
                                 (rl.getClazz().getShortName() == null ? rl.getClazz().getName(): rl.getClazz().getShortName() ) + "/" + position.intValue()
