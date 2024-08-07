@@ -2,6 +2,7 @@ package org.orienteering.wmoc.domain;
 
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Person;
+import org.orienteering.datastandard._3.ResultStatus;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,10 +29,12 @@ public class StartList {
 
     public void initFromPersonResults(List<Iof3PersonResult> personResult) {
         personResult.forEach(pr -> {
+
+            ResultStatus status = pr.getResult().get(0).getStatus();
             normalStartGroup.add(new FinalCompetitor(pr.getPerson(), pr.getResult().get(0).getBibNumber(),
                     (pr.getPerson().getNationality() == null ? "IOF" : pr.getPerson().getNationality().getCode()),
                     pr.getOrganisation().getName(),
-                    pr.getResult().get(0).getPosition(), pr.getResult().get(0).getTime(), clazzQualifier));
+                    pr.getResult().get(0).getPosition(), pr.getResult().get(0).getTime(), clazzQualifier, status != ResultStatus.DID_NOT_START));
         });
     }
 

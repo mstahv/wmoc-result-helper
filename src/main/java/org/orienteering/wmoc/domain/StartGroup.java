@@ -26,4 +26,13 @@ public class StartGroup extends ArrayList<FinalCompetitor> {
         }
         return false;
     }
+
+    public FinalCompetitor get(Person person) {
+        for (FinalCompetitor c : this) {
+            if(c.getPerson().equals(person)) {
+                return c;
+            }
+        }
+        return null;
+    }
 }

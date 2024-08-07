@@ -4,6 +4,8 @@ import com.vaadin.flow.component.notification.Notification;
 import org.orienteering.datastandard._3.Iof3ClassResult;
 import org.orienteering.datastandard._3.Iof3PersonResult;
 import org.orienteering.datastandard._3.Iof3ResultList;
+import org.orienteering.datastandard._3.Person;
+import org.orienteering.datastandard._3.ResultStatus;
 import org.orienteering.wmoc.domain.AgeClass;
 import org.orienteering.wmoc.domain.ClazzQualifier;
 import org.orienteering.wmoc.domain.FinalCompetitor;
@@ -150,16 +152,20 @@ public class ClassSplitterService {
                             StartList a = ageClass.getStartList(ClazzQualifier.A);
                             if (!a.getNormalStartGroup().contains(pr.getPerson())) {
                                 // not in normal start group in A, so must be relegated to B
-                                // lift back to A
+                                // lift back to A, if started (last clause of the 12.22)
                                 System.out.println("Top 4 from qualification always to A rule: " + pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven());
-                                FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).getRelegated().pick(pr.getPerson());
+                                Person person = pr.getPerson();
+                                FinalCompetitor finalCompetitor = ageClass.getStartList(ClazzQualifier.B).getRelegated().get(person);
                                 if (finalCompetitor == null) {
                                     // didn't start in middle final at all -> skip this one
                                     System.out.println(pr.getPerson().getName().getFamily() + " " + pr.getPerson().getName().getGiven() + " not found in relegated list, most likely didn't start in Middle final at all.");
                                     continue;
                                 }
-                                finalCompetitor.setReason("Top 4 from qualification always to A");
-                                a.addExtraStarter(finalCompetitor);
+                                if(finalCompetitor.isStartedInFinal()) {
+                                    ageClass.getStartList(ClazzQualifier.B).getRelegated().pick(person);
+                                    finalCompetitor.setReason("Top 4 from qualification always to A");
+                                    a.addExtraStarter(finalCompetitor);
+                                }
                             }
                         }
                     }
