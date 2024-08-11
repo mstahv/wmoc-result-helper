@@ -22,8 +22,8 @@ public class RankingPointsService {
                     Integer position = personResult.getResult().get(0).getPosition();
                     if(position != null) {
                         int pos = position.intValue();
-                        // first one gets 20 points, second 19, etc.
-                        int pointsForPosition = 21 - pos;
+                        // first one gets 3 points, second 2, etc.
+                        int pointsForPosition = 4 - pos;
                         if(pointsForPosition > 0) {
                             points.put(iofId, points.getOrDefault(iofId, 0) + pointsForPosition);
                         };
